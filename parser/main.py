@@ -1,6 +1,6 @@
 import json
 import os
-import fitz
+import pymupdf as fitz
 from pdf_parser import PDFParser
 from figure_extractor import FigureExtractor
 from table_extractor import TableExtractor

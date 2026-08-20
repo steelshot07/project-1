@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import pymupdf as fitz  # PyMuPDF
 
 class PDFParser:
     def __init__(self, pdf_path):
