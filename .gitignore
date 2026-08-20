@@ -1,0 +1,6 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Dataset raw downloads (Member 2/3 can download locally)
+data/raw_pdfs/
