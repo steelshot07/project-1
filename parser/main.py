@@ -1,5 +1,6 @@
 import json
 import fitz
+import os
 from pdf_parser import PDFParser
 from figure_extractor import FigureExtractor
 from table_extractor import TableExtractor
