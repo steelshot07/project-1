@@ -6,13 +6,16 @@ from figure_extractor import FigureExtractor
 from table_extractor import TableExtractor
 from dataset_loader import S2ORCPDFDownloader
 
+
 def process_dataset_batch(pdf_dir="data/raw_pdfs", output_base="data/processed"):
     # Step 1: Download dataset sample PDFs
-    downloader = S2ORCPDFDownloader(output_dir=pdf_dir, sample_size=30)
+    downloader = S2ORCPDFDownloader(output_dir=pdf_dir, sample_size=4)
     downloader.download_sample_pdfs()
 
     # Step 2: Parse every downloaded dataset PDF completely
-    pdf_files = [os.path.join(pdf_dir, f) for f in os.listdir(pdf_dir) if f.endswith(".pdf")]
+    pdf_files = [
+        os.path.join(pdf_dir, f) for f in os.listdir(pdf_dir) if f.endswith(".pdf")
+    ]
 
     for pdf_path in pdf_files:
         doc_id = os.path.basename(pdf_path).replace(".pdf", "")
@@ -26,20 +29,28 @@ def process_dataset_batch(pdf_dir="data/raw_pdfs", output_base="data/processed")
         tab_parser = TableExtractor(pdf_path, output_dir=tab_dir)
 
         # Complete dataset output structure containing all required modalities
+        parsed_structure = text_parser.parse()
+
+        validation = text_parser.validate(parsed_structure)
+
+        if not validation["valid"]:
+
+            print("Parser validation failed:", validation["errors"])
         parsed_doc = {
             "doc_id": doc_id,
-            "metadata": text_parser.extract_metadata(),
-            "text_blocks": text_parser.extract_text(),
+            "metadata": parsed_structure["metadata"],
+            "pages": parsed_structure["pages"],
+            "sections": parsed_structure["sections"],
             "figures": fig_parser.extract_figures(),
-            "tables": tab_parser.extract_tables()
+            "tables": tab_parser.extract_tables(),
         }
-
         os.makedirs(doc_out_dir, exist_ok=True)
         json_path = os.path.join(doc_out_dir, f"{doc_id}_parsed.json")
         with open(json_path, "w") as f:
             json.dump(parsed_doc, f, indent=2)
 
         print(f"✅ Processed Dataset Paper: {doc_id} -> Full Multimodal Output Saved")
+
 
 if __name__ == "__main__":
     process_dataset_batch()
