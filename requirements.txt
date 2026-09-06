@@ -174,3 +174,5 @@ xxhash==3.8.1
 xyzservices==2026.3.0
 yarl==1.20.1
 zstandard==0.25.0
+
+rank-bm25==0.2.2
