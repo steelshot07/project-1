@@ -84,6 +84,27 @@ class DocumentIndexer:
         )
 
         self.bm25 = BM25Index(index_path=bm25_path)
+        self._bm25_path = bm25_path
+
+    def reset(self) -> None:
+        """Delete and recreate the ChromaDB collection and clear the BM25 index."""
+        print(f"[Indexer] Resetting collection '{self.collection_name}'…")
+        try:
+            self.client.delete_collection(self.collection_name)
+        except Exception:
+            pass
+        self.collection = self.client.get_or_create_collection(
+            name=self.collection_name,
+            metadata={"description": "Multimodal academic document retrieval"},
+        )
+        # Overwrite BM25 with an empty index
+        import json as _json
+        import os as _os
+        if _os.path.exists(self._bm25_path):
+            _os.remove(self._bm25_path)
+        from bm25_index import BM25Index as _BM25
+        self.bm25 = _BM25(index_path=self._bm25_path)
+        print("[Indexer] Reset complete.")
 
     # -------------------------------------------------------------------
     # Core indexing
@@ -136,7 +157,7 @@ class DocumentIndexer:
         self.bm25.add_evidence(evidence_list)
         self.bm25.save()
 
-        print(f"[Indexer] ✅ {doc_id} indexed successfully.")
+        print(f"[Indexer] [OK] {doc_id} indexed successfully.")
 
     def index_directory(
         self,
@@ -162,7 +183,7 @@ class DocumentIndexer:
             try:
                 self.index_document(json_path)
             except Exception as exc:
-                print(f"[Indexer] ⚠️  Failed to index {json_path}: {exc}")
+                print(f"[Indexer] [WARN] Failed to index {json_path}: {exc}")
 
         print("\n[Indexer] Indexing complete.")
         self._print_stats()
@@ -209,10 +230,17 @@ if __name__ == "__main__":
         default=BM25_PATH,
         help="Path for the BM25 index JSON file.",
     )
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete and recreate the ChromaDB collection before indexing.",
+    )
     args = parser.parse_args()
 
     indexer = DocumentIndexer(
         persist_directory=args.chroma_dir,
         bm25_path=args.bm25_path,
     )
+    if args.reset:
+        indexer.reset()
     indexer.index_directory(args.processed_dir)

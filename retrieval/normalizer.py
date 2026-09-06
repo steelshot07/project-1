@@ -309,7 +309,7 @@ def normalize_document(
         f"{len(text_evidence)} text chunks, "
         f"{len(table_evidence)} tables, "
         f"{len(figure_evidence)} figures "
-        f"→ {len(all_evidence)} total evidence items"
+        f"-> {len(all_evidence)} total evidence items"
     )
 
     return all_evidence
