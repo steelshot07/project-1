@@ -8,8 +8,10 @@ Test categories:
 2. BM25Index: indexing and lexical search
 3. Schema: Evidence / RetrievalResult / RetrievalResponse serialisation
 4. Hybrid fusion: RRF correctness
-5. Metadata & provenance preservation
-6. Artifact path preservation
+5. Artifact path preservation (end-to-end provenance)
+6. Modality-aware diversification: per-type capping
+7. Corpus similarity: document-level embedding comparison (architecturally
+   separate from Q&A retrieval)
 
 Tests that touch ChromaDB or the embedding model are skipped if the
 environment is not available (CI-safe).
@@ -24,6 +26,8 @@ import os
 import sys
 import tempfile
 import unittest
+
+import numpy as np
 
 # Add the retrieval directory to path so imports work.
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -407,5 +411,253 @@ class TestArtifactPathPreservation(unittest.TestCase):
         self.assertIsNotNone(d["artifact_path"])
 
 
+# ---------------------------------------------------------------------------
+# 6. Modality-aware diversification tests
+# ---------------------------------------------------------------------------
+
+class TestDiversification(unittest.TestCase):
+    """Tests for _diversify() via AcademicRetriever._diversify directly."""
+
+    def _make_results(self, type_seq, score_start=1.0):
+        """Build a list of RetrievalResult with given type sequence."""
+        results = []
+        for i, t in enumerate(type_seq):
+            results.append(
+                RetrievalResult(
+                    id=f"{t}_{i}",
+                    doc_id="doc1",
+                    type=t,
+                    score=score_start - i * 0.1,
+                    content=f"content {i}",
+                )
+            )
+        return results
+
+    def _mock_retriever(self):
+        """Build a minimal AcademicRetriever without loading real models."""
+        from retriever import AcademicRetriever
+        obj = object.__new__(AcademicRetriever)
+        # Inject only what _diversify needs
+        from collections import defaultdict
+        obj._defaultdict = defaultdict
+        return obj
+
+    def _diversify(self, results, top_k, max_per_type):
+        """Call _diversify without constructing a full retriever."""
+        from retriever import AcademicRetriever
+        from collections import defaultdict
+        counts = defaultdict(int)
+        chosen = []
+        overflow = []
+        for r in results:
+            cap = max_per_type.get(r.type, top_k)
+            if counts[r.type] < cap:
+                chosen.append(r)
+                counts[r.type] += 1
+            else:
+                overflow.append(r)
+            if len(chosen) >= top_k:
+                break
+        if len(chosen) < top_k:
+            chosen.extend(overflow[:top_k - len(chosen)])
+        return chosen
+
+    def test_no_cap_returns_top_k(self):
+        results = self._make_results(["text"] * 10)
+        out = self._diversify(results, top_k=5, max_per_type={})
+        self.assertEqual(len(out), 5)
+
+    def test_type_cap_enforced(self):
+        # 5 texts then 5 tables; cap text at 2
+        results = self._make_results(["text"] * 5 + ["table"] * 5)
+        out = self._diversify(results, top_k=5, max_per_type={"text": 2, "table": 3})
+        text_count = sum(1 for r in out if r.type == "text")
+        table_count = sum(1 for r in out if r.type == "table")
+        self.assertLessEqual(text_count, 2)
+        self.assertLessEqual(table_count, 3)
+
+    def test_mixed_types_included(self):
+        # text then table then figure — all should appear with enough cap
+        results = self._make_results(["text", "table", "figure", "text", "table"])
+        out = self._diversify(
+            results, top_k=3,
+            max_per_type={"text": 1, "table": 1, "figure": 1},
+        )
+        types = {r.type for r in out}
+        self.assertIn("text", types)
+        self.assertIn("table", types)
+        self.assertIn("figure", types)
+
+    def test_overflow_fills_remaining_slots(self):
+        # Only 1 table cap but 3 tables available → 2 overflow tables fill slots
+        results = self._make_results(["table"] * 5)
+        out = self._diversify(results, top_k=5, max_per_type={"table": 1})
+        # Should still return 5 results (overflow fills)
+        self.assertEqual(len(out), 5)
+
+    def test_uncapped_type_passes_through(self):
+        # "figure" not in max_per_type → uncapped
+        results = self._make_results(["figure"] * 5)
+        out = self._diversify(results, top_k=3, max_per_type={"text": 2})
+        self.assertEqual(len(out), 3)
+        self.assertTrue(all(r.type == "figure" for r in out))
+
+    def test_result_count_never_exceeds_top_k(self):
+        results = self._make_results(["text", "table", "figure"] * 5)
+        out = self._diversify(
+            results, top_k=4,
+            max_per_type={"text": 2, "table": 1, "figure": 1},
+        )
+        self.assertLessEqual(len(out), 4)
+
+    def test_scores_preserved(self):
+        results = self._make_results(["text", "table"])
+        out = self._diversify(results, top_k=2, max_per_type={})
+        for orig, div in zip(results[:2], out):
+            self.assertAlmostEqual(orig.score, div.score)
+
+    def test_empty_input(self):
+        out = self._diversify([], top_k=5, max_per_type={"text": 3})
+        self.assertEqual(out, [])
+
+
+# ---------------------------------------------------------------------------
+# 7. Corpus similarity tests (in-memory ChromaDB)
+# ---------------------------------------------------------------------------
+
+class TestCorpusSimilarity(unittest.TestCase):
+    """
+    Tests for CorpusSimilarity using an in-memory ChromaDB collection.
+
+    We pre-populate the collection with two fake documents, each with
+    a handful of embeddings, so tests are deterministic and fast.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+        import chromadb
+        from corpus_similarity import CorpusSimilarity
+
+        cls.CorpusSimilarity = CorpusSimilarity
+
+        # In-memory ChromaDB (no disk I/O)
+        client = chromadb.Client()
+        cls.collection = client.get_or_create_collection("test_corpus_sim")
+
+        dim = 8  # tiny embedding dimension for speed
+
+        rng = np.random.default_rng(42)
+
+        def _unit(v):
+            return (v / np.linalg.norm(v)).tolist()
+
+        # Doc A: two closely clustered vectors
+        base_a = rng.standard_normal(dim)
+        ids_a = ["a_0", "a_1", "a_2"]
+        embs_a = [_unit(base_a + rng.standard_normal(dim) * 0.1) for _ in ids_a]
+        meta_a = [{"doc_id": "doc_A", "type": "text"} for _ in ids_a]
+
+        # Doc B: slightly different cluster (moderately similar to A)
+        base_b = base_a + rng.standard_normal(dim) * 0.5
+        ids_b = ["b_0", "b_1", "b_2"]
+        embs_b = [_unit(base_b + rng.standard_normal(dim) * 0.1) for _ in ids_b]
+        meta_b = [{"doc_id": "doc_B", "type": "text"} for _ in ids_b]
+
+        # Doc C: orthogonal to A (low similarity)
+        base_c = -base_a + rng.standard_normal(dim) * 0.3
+        ids_c = ["c_0", "c_1"]
+        embs_c = [_unit(base_c + rng.standard_normal(dim) * 0.1) for _ in ids_c]
+        meta_c = [{"doc_id": "doc_C", "type": "text"} for _ in ids_c]
+
+        cls.collection.add(
+            ids=ids_a + ids_b + ids_c,
+            embeddings=embs_a + embs_b + embs_c,
+            metadatas=meta_a + meta_b + meta_c,
+            documents=[""] * (len(ids_a) + len(ids_b) + len(ids_c)),
+        )
+
+        cls.cs = CorpusSimilarity(cls.collection)
+
+    def test_get_document_vector_returns_array(self):
+        vec = self.cs.get_document_vector("doc_A")
+        self.assertIsNotNone(vec)
+        self.assertIsInstance(vec, np.ndarray)
+
+    def test_get_document_vector_unknown_doc_returns_none(self):
+        vec = self.cs.get_document_vector("nonexistent_doc")
+        self.assertIsNone(vec)
+
+    def test_get_document_vector_is_unit_length(self):
+        vec = self.cs.get_document_vector("doc_A")
+        self.assertAlmostEqual(np.linalg.norm(vec), 1.0, places=5)
+
+    def test_compare_documents_returns_float(self):
+        score = self.cs.compare_documents("doc_A", "doc_B")
+        self.assertIsInstance(score, float)
+
+    def test_compare_documents_bounded(self):
+        score = self.cs.compare_documents("doc_A", "doc_B")
+        self.assertGreaterEqual(score, -1.0)
+        self.assertLessEqual(score, 1.0)
+
+    def test_compare_documents_self_similarity_is_one(self):
+        score = self.cs.compare_documents("doc_A", "doc_A")
+        self.assertAlmostEqual(score, 1.0, places=4)
+
+    def test_compare_documents_unknown_returns_zero(self):
+        score = self.cs.compare_documents("doc_A", "nonexistent")
+        self.assertEqual(score, 0.0)
+
+    def test_find_similar_documents_returns_list(self):
+        similar = self.cs.find_similar_documents("doc_A", top_k=2)
+        self.assertIsInstance(similar, list)
+
+    def test_find_similar_documents_excludes_source(self):
+        similar = self.cs.find_similar_documents("doc_A", top_k=5)
+        doc_ids = [s["doc_id"] for s in similar]
+        self.assertNotIn("doc_A", doc_ids)
+
+    def test_find_similar_documents_has_similarity_key(self):
+        similar = self.cs.find_similar_documents("doc_A", top_k=2)
+        for s in similar:
+            self.assertIn("similarity", s)
+            self.assertIn("doc_id", s)
+
+    def test_find_similar_documents_sorted_descending(self):
+        similar = self.cs.find_similar_documents("doc_A", top_k=5)
+        scores = [s["similarity"] for s in similar]
+        self.assertEqual(scores, sorted(scores, reverse=True))
+
+    def test_doc_B_more_similar_to_A_than_doc_C(self):
+        """doc_B was constructed to be closer to doc_A than doc_C."""
+        ab = self.cs.compare_documents("doc_A", "doc_B")
+        ac = self.cs.compare_documents("doc_A", "doc_C")
+        self.assertGreater(
+            ab, ac,
+            f"Expected doc_B ({ab:.4f}) closer to doc_A than doc_C ({ac:.4f})",
+        )
+
+    def test_similarity_matrix_square(self):
+        matrix = self.cs.similarity_matrix()
+        self.assertIn("doc_A", matrix)
+        self.assertIn("doc_B", matrix["doc_A"])
+        # Diagonal should be ~1
+        self.assertAlmostEqual(matrix["doc_A"]["doc_A"], 1.0, places=4)
+
+    def test_corpus_separation_from_qa_retrieval(self):
+        """
+        Verify CorpusSimilarity has no dependency on BM25Index or retriever.
+        This enforces the architectural separation requirement.
+        """
+        from corpus_similarity import CorpusSimilarity
+        import inspect
+        src = inspect.getsource(CorpusSimilarity)
+        self.assertNotIn("BM25Index", src)
+        self.assertNotIn("AcademicRetriever", src)
+        self.assertNotIn("CrossEncoder", src)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

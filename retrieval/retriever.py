@@ -11,12 +11,17 @@ Hybrid retrieval pipeline:
            ↓
        optional CrossEncoder reranking
            ↓
+       modality-aware diversification  (optional)
+           ↓
        evidence expansion (neighbouring text chunks)
            ↓
        RetrievalResponse
 
 The retrieval layer returns EVIDENCE, not answers.
 The answer-generation layer consumes RetrievalResponse.
+
+Separate module (corpus_similarity.py) handles document-level
+similarity search, which is a conceptually different operation.
 
 Usage
 -----
@@ -264,7 +269,66 @@ class AcademicRetriever:
         return reranked[:top_k]
 
     # -------------------------------------------------------------------
-    # Stage 6: Evidence expansion
+    # Stage 6: Modality-aware diversification
+    # -------------------------------------------------------------------
+
+    def _diversify(
+        self,
+        results: List[RetrievalResult],
+        top_k: int,
+        max_per_type: Optional[Dict[str, int]],
+    ) -> List[RetrievalResult]:
+        """
+        Enforce per-type caps on the ranked result list.
+
+        Walks the ranked list in order, admitting each item if its type
+        has not yet hit its cap.  Overflow items (type cap reached) are
+        collected and appended to fill any remaining top_k slots after
+        the primary pass.
+
+        This prevents text chunks from crowding out relevant tables or
+        figures when cross-modal evidence exists in the candidate pool.
+
+        Parameters
+        ----------
+        results:
+            Ranked RetrievalResult list (descending score).
+        top_k:
+            Maximum final result count.
+        max_per_type:
+            Dict mapping type → max allowed occurrences in output.
+            Types not mentioned are treated as uncapped.
+            Example: {"text": 3, "table": 2, "figure": 2}
+
+        Returns
+        -------
+        Diversified list of at most top_k RetrievalResult objects.
+        """
+        if not max_per_type:
+            return results[:top_k]
+
+        counts: Dict[str, int] = defaultdict(int)
+        chosen: List[RetrievalResult] = []
+        overflow: List[RetrievalResult] = []
+
+        for r in results:
+            cap = max_per_type.get(r.type, top_k)  # uncapped if not in dict
+            if counts[r.type] < cap:
+                chosen.append(r)
+                counts[r.type] += 1
+            else:
+                overflow.append(r)
+            if len(chosen) >= top_k:
+                break
+
+        # Fill remaining slots from overflow (preserving score order)
+        if len(chosen) < top_k:
+            chosen.extend(overflow[: top_k - len(chosen)])
+
+        return chosen
+
+    # -------------------------------------------------------------------
+    # Stage 7: Evidence expansion
     # -------------------------------------------------------------------
 
     def _expand_evidence(
@@ -305,6 +369,8 @@ class AcademicRetriever:
         types: Optional[List[str]] = None,
         use_reranker: bool = True,
         expand_evidence: bool = True,
+        diversify: bool = False,
+        max_per_type: Optional[Dict[str, int]] = None,
     ) -> RetrievalResponse:
         """
         Run the full hybrid retrieval pipeline.
@@ -326,6 +392,16 @@ class AcademicRetriever:
             Whether to apply CrossEncoder reranking after fusion.
         expand_evidence:
             Whether to attach neighbouring chunks to text results.
+        diversify:
+            Whether to apply modality-aware diversification after reranking.
+            When True, uses max_per_type to cap each evidence type so visual
+            evidence (tables/figures) is not crowded out by text chunks.
+        max_per_type:
+            Per-type cap applied during diversification.
+            Only used when diversify=True.
+            Defaults to {"text": top_k-2, "table": 2, "figure": 1} when None
+            and diversify=True.
+            Example: {"text": 3, "table": 2, "figure": 2}
 
         Returns
         -------
@@ -344,18 +420,18 @@ class AcademicRetriever:
 
         # 4. Rerank (or fall back to RRF scores)
         if use_reranker and self.reranker:
-            ranked = self._rerank(query, fused, ev_map, top_k)
+            ranked = self._rerank(query, fused, ev_map, top_k * 3)
         else:
-            ranked = fused[:top_k]
+            ranked = fused[: top_k * 3]
 
-        # 5. Build RetrievalResult objects
-        results: List[RetrievalResult] = []
+        # 5. Build RetrievalResult objects from the extended candidate pool
+        result_pool: List[RetrievalResult] = []
         for eid, score in ranked:
             if eid not in ev_map:
                 continue
             ev = ev_map[eid]
             ctx = self._expand_evidence(ev, ev_map) if expand_evidence else []
-            results.append(
+            result_pool.append(
                 RetrievalResult(
                     id=ev.id,
                     doc_id=ev.doc_id,
@@ -370,6 +446,17 @@ class AcademicRetriever:
                     context_chunks=ctx,
                 )
             )
+
+        # 6. Modality-aware diversification (optional)
+        if diversify:
+            type_caps = max_per_type or {
+                "text": max(1, top_k - 2),
+                "table": min(2, top_k),
+                "figure": min(1, top_k),
+            }
+            results = self._diversify(result_pool, top_k, type_caps)
+        else:
+            results = result_pool[:top_k]
 
         return RetrievalResponse(query=query, results=results)
 
