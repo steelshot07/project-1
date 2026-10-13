@@ -1,0 +1,24 @@
+Algorithm 1 Imitation Learning for Training a Power Grid Control Agent |  |  |  |  |  |  | 
+Initialize: | policy network π with random | a t = π collect (s t ) |  |  |  |  | 
+weights θ | s t+1 ← perform a t on s t |  |  |  |  |  | 
+D = COLLECT SUCCESSFUL STEPS(S train ) | if s t+1 ∈ T then |  |  |  |  |  | 
+l objective | = | 1 # set an objective average | D = D ∪ {(s t ,a t )} |  |  |  | 
+episode’s length to terminate the runtime. | break |  |  |  |  |  | 
+while True do | return D |  |  |  |  |  | 
+Train θ with an optimizer (eg., Adam) on |  |  |  |  |  |  | 
+dataset D for an epoch | procedure EVALUATE EPISODE LENGTH(S, |  |  |  |  |  | 
+l = EVALUATE EPISODE LENGTH(S test , | π) |  |  |  |  |  | 
+π θ ) | Initialize L = ∅ |  |  |  |  |  | 
+if l ≤ l objective then | n episodes | = | 50 | # | set | number | of
+terminate | episodes(cases) to evaluate |  |  |  |  |  | 
+t limit = 50 # set a horizon limit |  |  |  |  |  |  | 
+procedure COLLECT SUCCESSFUL STEPS(S) | for i = 1,2,...,n episodes do |  |  |  |  |  | 
+Initialize D = ∅ | Randomly sample a state s 0 from S |  |  |  |  |  | 
+Set policy π collect to be an arbitrary policy | for t = 0,1,2...,t limit − 1 do |  |  |  |  |  | 
+(eg., random policy, trained SAC policy, etc.) | a t = π(s t ) |  |  |  |  |  | 
+n = number of successful steps to collect | s t+1 ← perform a t on s t |  |  |  |  |  | 
+(eg., 10000) | if s t+1 ∈ T or t + 1 = t limit then |  |  |  |  |  | 
+t limit = 1000 # set a horizon limit | L = L ∪ {t + 1} |  |  |  |  |  | 
+while |D| < n do | break |  |  |  |  |  | 
+Randomly sample a state s 0 from S | return E l∈L [l] |  |  |  |  |  | 
+for t = 0,1,2...,t limit − 1 do |  |  |  |  |  |  | 

@@ -1,0 +1,4 @@
+Hyperparameter | Description | Value
+hidden_fc_layers | fully connected layers | [512, 512]
+batch_size | batch size | 32∼512
+lr | learning rate | 0.001

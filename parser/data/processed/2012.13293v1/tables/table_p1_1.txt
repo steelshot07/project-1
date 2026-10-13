@@ -1,0 +1,15 @@
+42 | and use it in a different system, with different f
+process) the reconstructed image offers 50 to | 
+success rates than the system’s FAR. | 
+]RC.sc[ | 
+Index Terms—protection of biometric system | 
+face recognition, privacy | 
+I. INTRODUCTION | 
+Entrance control is based on three possib | 
+1v39231.21 | who forget theirs passwords) and devices may
+you know (passwords), what you have (device | 
+are (biometrics) [1]. While passwords have m | 
+problems (due to lack of entropy and the need | 
+biometrics is usually considered as a “safe” | 
+of a person appearance or behaviour and is | 
+unique. | 

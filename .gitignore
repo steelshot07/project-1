@@ -4,3 +4,13 @@ __pycache__/
 
 # Dataset raw downloads (Member 2/3 can download locally)
 data/raw_pdfs/
+# Generated retrieval indexes (rebuild with: python retrieval/indexer.py --reset)
+data/chroma_db/
+data/bm25_index*.json
+retrieval/data/
+
+# Raw PDFs (download locally)
+parser/data/raw_pdfs/
+
+# Editor settings
+.vscode/

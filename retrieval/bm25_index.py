@@ -68,34 +68,43 @@ class BM25Index:
         """
         Add evidence items to the index.
 
-        Items whose IDs already exist are replaced (upsert semantics).
+        Items whose uids already exist are replaced (upsert semantics).
         Call save() after adding to persist.
         """
-        existing_ids = set(self._ids)
+        # Keys are doc-qualified uids ('<doc_id>::<id>'): parser table /
+        # figure ids repeat across documents and must not overwrite each other.
+        position = {eid: i for i, eid in enumerate(self._ids)}
 
         for ev in evidence_list:
-            if ev.id in existing_ids:
-                # Replace in-place
-                idx = self._ids.index(ev.id)
+            key = ev.uid
+            meta = {
+                "id": ev.id,
+                "doc_id": ev.doc_id,
+                "type": ev.type,
+                "page": ev.page if ev.page is not None else -1,
+            }
+            if key in position:
+                idx = position[key]
                 self._corpus[idx] = _tokenize(ev.content)
-                self._meta[idx] = {
-                    "doc_id": ev.doc_id,
-                    "type": ev.type,
-                    "page": ev.page if ev.page is not None else -1,
-                }
+                self._meta[idx] = meta
             else:
+                position[key] = len(self._ids)
                 self._corpus.append(_tokenize(ev.content))
-                self._ids.append(ev.id)
-                self._meta.append(
-                    {
-                        "doc_id": ev.doc_id,
-                        "type": ev.type,
-                        "page": ev.page if ev.page is not None else -1,
-                    }
-                )
-                existing_ids.add(ev.id)
+                self._ids.append(key)
+                self._meta.append(meta)
 
         self._bm25 = BM25Okapi(self._corpus) if self._corpus else None
+
+    def remove_document(self, doc_id: str) -> int:
+        """Drop every entry of ``doc_id``.  Returns the number removed."""
+        keep = [i for i, m in enumerate(self._meta) if m.get("doc_id") != doc_id]
+        removed = len(self._ids) - len(keep)
+        if removed:
+            self._corpus = [self._corpus[i] for i in keep]
+            self._ids = [self._ids[i] for i in keep]
+            self._meta = [self._meta[i] for i in keep]
+            self._bm25 = BM25Okapi(self._corpus) if self._corpus else None
+        return removed
 
     def save(self) -> None:
         """Persist the index to disk as JSON."""
@@ -138,6 +147,7 @@ class BM25Index:
         top_k: int = 20,
         doc_id: Optional[str] = None,
         types: Optional[List[str]] = None,
+        return_uids: bool = False,
     ) -> List[Tuple[str, float]]:
         """
         Return a ranked list of (evidence_id, bm25_score) tuples.
@@ -153,6 +163,11 @@ class BM25Index:
         types:
             If provided, restrict results to these evidence types.
             e.g. ['table', 'figure']
+        return_uids:
+            False (default, backward compatible): return parser ids such as
+            'table_p9_1' — these are only unique within one document.
+            True: return doc-qualified uids ('<doc_id>::<id>'), which the
+            hybrid retriever uses so documents never collide.
 
         Returns
         -------
@@ -173,7 +188,7 @@ class BM25Index:
                 continue
             if types and meta.get("type") not in types:
                 continue
-            candidates.append((eid, score))
+            candidates.append((eid if return_uids else meta.get("id", eid), score))
 
         candidates.sort(key=lambda x: x[1], reverse=True)
         return candidates[:top_k]

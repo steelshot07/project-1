@@ -1,0 +1,2 @@
+1Here we assume that algorithmic performance is a quantity in [0,1], an assumption we relax in Section 2.
+2

@@ -28,7 +28,7 @@ Usage
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
     client = chromadb.PersistentClient("data/chroma_db")
-    collection = client.get_collection("academic_documents_v3")
+    collection = client.get_collection("academic_documents_v4")
 
     cs = CorpusSimilarity(collection, model)
 
@@ -350,7 +350,7 @@ def main() -> None:
     )
     parser.add_argument("--chroma-dir", default="data/chroma_db")
     parser.add_argument(
-        "--collection", default="academic_documents_v3"
+        "--collection", default="academic_documents_v4"
     )
     args = parser.parse_args()
 

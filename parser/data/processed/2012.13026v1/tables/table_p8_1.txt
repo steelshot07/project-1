@@ -1,0 +1,8 @@
+Name | Description | Unit or value
+V m | voltage magnitude | p.u
+V a | voltage angle | p.u
+S line | line flow apparent power | p.u
+P g | active power of generator | MW
+Q g | reactive power of generator | MVar
+n s | state dimension | 1442
+n a | action dimension(number of plants) | 16

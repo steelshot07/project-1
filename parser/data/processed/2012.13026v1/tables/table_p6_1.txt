@@ -1,0 +1,13 @@
+Policy | Number of unsolvable cases | Avg steps to solve a case
+train set: 127/9433(1.35%) | train set: 11.53 | 
+random policy |  | 
+test set: 13/1000(1.3%) | test set: 11.98 | 
+train set: 138/9433(1.46%) | train set: 3.17 | 
+SAC agent(normal distributed action) |  | 
+test set: 16/1000(1.6%) | test set: 2.91 | 
+train set: 226/9433(2.40%) | train set: 1 | 
+SAC agent(greedy action) |  | 
+test set: 22/1000(2.2%) | test set: 1 | 
+train set: 196/9433(2.08%) | train set: 1 | 
+imitation learning agent |  | 
+test set: 21/1000(2.1%) | test set: 1 | 

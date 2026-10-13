@@ -1,0 +1,7 @@
+Image Type | Binarization | 1.0% FAR | 0.1% FAR
+Original | N | 100% | 100%
+Original | Y | 100% | 100%
+Reconstructed from unprotected template | N | 98.96% (95.36%) | 95.16% (95.36%)
+Reconstructed from protected template | N | 96.19% (92.69%) | 83.39% (80.36%)
+Reconstructed from unprotected template | Y | 94.81% (91.37%) | 81.31%(78.34%)
+Reconstructed from protected template | Y | 96.19% (92.69%) | 87.89% (84.70%)

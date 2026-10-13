@@ -1,0 +1,3 @@
+this section, we use the results from the previous section to provide guarantees for the high-leve
+rning procedure outlined in Section 2:
+8

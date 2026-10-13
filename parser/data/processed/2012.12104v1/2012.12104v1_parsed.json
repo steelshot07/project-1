@@ -1,0 +1,4059 @@
+{
+  "doc_id": "2012.12104v1",
+  "metadata": {
+    "title": "Unknown Title",
+    "authors": "Thomas Faust",
+    "total_pages": 15
+  },
+  "pages": [
+    {
+      "page_number": 1,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p1_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "1"
+        },
+        {
+          "block_id": "p1_b1",
+          "bbox": [
+            72.0,
+            70.03,
+            508.36,
+            92.11
+          ],
+          "type": "heading",
+          "text": "A Deep Reinforcement Learning Approach for Ramp Metering"
+        },
+        {
+          "block_id": "p1_b2",
+          "bbox": [
+            72.02,
+            97.75,
+            270.77,
+            119.84
+          ],
+          "type": "heading",
+          "text": "Based on Traffic Video Data"
+        },
+        {
+          "block_id": "p1_b3",
+          "bbox": [
+            72.0,
+            139.48,
+            379.41,
+            156.08
+          ],
+          "type": "paragraph",
+          "text": "Bing Liu, 1  Yu Tang, 2  Yuxiong Ji, 1  Yu Shen, 1  and Yuchuan Du 1"
+        },
+        {
+          "block_id": "p1_b4",
+          "bbox": [
+            72.0,
+            167.2,
+            494.52,
+            211.4
+          ],
+          "type": "paragraph",
+          "text": "1  Key Laboratory of Road and Traffic Engineering of the Ministry of Education, Tongji  University, Shanghai 201804, China.  2  Tandon School of Engineering, New York University, New York 11201, USA."
+        },
+        {
+          "block_id": "p1_b5",
+          "bbox": [
+            72.0,
+            223.08,
+            417.84,
+            239.24
+          ],
+          "type": "paragraph",
+          "text": "Correspondence should be addressed to Yu Shen;  yshen@tongji.edu.cn"
+        },
+        {
+          "block_id": "p1_b6",
+          "bbox": [
+            72.0,
+            250.49,
+            127.58,
+            269.93
+          ],
+          "type": "heading",
+          "text": "Abstract"
+        },
+        {
+          "block_id": "p1_b7",
+          "bbox": [
+            72.0,
+            280.92,
+            525.96,
+            476.48
+          ],
+          "type": "paragraph",
+          "text": "Ramp metering that uses traffic signals to regulate vehicle flows from the on-ramps has been  widely implemented to improve vehicle mobility of the freeway. Previous studies generally  update signal timings in real-time based on predefined traffic measures collected by point  detectors, such as traffic volumes and occupancies. Comparing with point detectors, traffic  cameras\u2014which have been increasingly deployed on road networks\u2014could cover larger areas  and provide more detailed traffic information. In this work, we propose a deep reinforcement  learning (DRL) method to explore the potential of traffic video data in improving the efficiency  of ramp metering. The proposed method uses traffic video frames as inputs and learns the  optimal control strategies directly from the high-dimensional visual inputs. A real-world case  study demonstrates that, in comparison with a state-of-the-practice method, the proposed DRL  method results in 1) lower travel times in the mainline, 2) shorter vehicle queues at the on- ramp, and 3) higher traffic flows downstream of the merging area. The results suggest that the  proposed method is able to extract useful information from the video data for better ramp  metering controls."
+        },
+        {
+          "block_id": "p1_b8",
+          "bbox": [
+            72.0,
+            488.16,
+            363.6,
+            504.32
+          ],
+          "type": "paragraph",
+          "text": "Keywords : Ramp metering, Deep  Q -learning, Traffic videos"
+        }
+      ]
+    },
+    {
+      "page_number": 2,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p2_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "2"
+        },
+        {
+          "block_id": "p2_b1",
+          "bbox": [
+            72.0,
+            70.25,
+            151.71,
+            89.69
+          ],
+          "type": "heading",
+          "text": "Introduction"
+        },
+        {
+          "block_id": "p2_b2",
+          "bbox": [
+            72.0,
+            100.8,
+            525.96,
+            213.56
+          ],
+          "type": "paragraph",
+          "text": "Ramp metering uses traffic signals to regulate vehicle flows from on-ramps to the mainline of  the freeway. It alleviates the negative impacts of \u201ccapacity drop\u201d resulting from massive  merging behaviors and reduces the total time spent in the traffic system [1, 2]. Several field  tests have demonstrated the effectiveness of ramp metering in terms of throughput, vehicle- miles-traveled, vehicle-hours-traveled, and travel time reliability [3-6]. For instance, a large- scale experiment conducted in Minneapolis-Saint Paul found that when the ramp meters were  turned off, freeway capacity decreased by 9%, travel time increased by 22%, and crashes  increased by 26% [7]."
+        },
+        {
+          "block_id": "p2_b3",
+          "bbox": [
+            72.0,
+            211.2,
+            525.96,
+            310.16
+          ],
+          "type": "paragraph",
+          "text": "Most of the ramp metering methods are driven by traffic measures, such as volumes,  queue lengths, and occupancies, obtained from point detectors ( e.g. , inductive loop detectors)  [8, 9]. These measures are predefined and only reflect partial information regarding traffic  operations. Recently, traffic cameras have been increasingly deployed on road networks for  monitoring traffic operations and detecting illegal driving behaviors. Compared with point  detectors, traffic cameras cover larger areas and provide more detailed traffic information, such  as vehicle locations, vehicle speeds, and headways between vehicles."
+        },
+        {
+          "block_id": "p2_b4",
+          "bbox": [
+            72.0,
+            307.8,
+            525.96,
+            406.76
+          ],
+          "type": "paragraph",
+          "text": "We propose a deep reinforcement learning (DRL) method to explore the potential of  traffic video data in improving the efficiency of ramp metering. The proposed method does not  rely on hand-crafted traffic measures. Instead, it uses traffic video frames as inputs and learns  the optimal control strategies directly from high-dimensional visual inputs by taking advantage  of the special neutral structures in deep learning, which are capable of automatically extracting  high-level features from raw data. The effectiveness of the proposed method is demonstrated  in comparison with a state-of-the-practice method in a real-world case study."
+        },
+        {
+          "block_id": "p2_b5",
+          "bbox": [
+            72.0,
+            404.4,
+            525.96,
+            461.96
+          ],
+          "type": "paragraph",
+          "text": "This paper is organized as follows. A brief review of related literature is presented first,  and then the methodology is described, followed by the demonstration in a real-world case  study. The final section summarizes the paper and discusses possible directions for future  research."
+        },
+        {
+          "block_id": "p2_b6",
+          "bbox": [
+            72.0,
+            473.21,
+            165.39,
+            492.65
+          ],
+          "type": "heading",
+          "text": "Related Works"
+        },
+        {
+          "block_id": "p2_b7",
+          "bbox": [
+            72.0,
+            503.64,
+            525.96,
+            575.0
+          ],
+          "type": "paragraph",
+          "text": "The signal timing plans for ramp metering could be fixed or traffic responsive. Wattleworth  [10] firstly formulated a linear programming model to optimize a fixed signal timing plan for  ramp metering based on historical traffic volume data. Responsive approaches adapt to traffic  flow fluctuations by updating signal timings in response to real-time traffic measures. The  responsive approaches can be classified as rule-based, optimization-based, and RL-based."
+        },
+        {
+          "block_id": "p2_b8",
+          "bbox": [
+            72.0,
+            572.64,
+            528.96,
+            754.4
+          ],
+          "type": "paragraph",
+          "text": "The rule-based approaches update signal timings in real-time according to specific rules.  Masher et al. [11] proposed a feedforward ramp metering algorithm, aiming at keeping the  downstream traffic flow below the capacity. Papageorgiou et al. [8] proposed a feedback ramp  metering algorithm, which is named as ALINEA, based on the occupancy obtained by  inductive loop detectors downstream of the merging area [12]. The ALINEA regulates the  inflows from the on-ramp in the scheme of closed-loop control so that the detected occupancy  would approach a predefined target value. The ALINEA was further extended by considering  more traffic measures, such as queue lengths at the on-ramp and traffic volumes in the mainline  [13]. Wang et al. [9] proposed the proportional-integral-based ALINEA (i.e. PI-ALINEA),  considering the cases where a bottleneck with a capacity lower than that of the merging area is  present further downstream of the mearing area. They demonstrated numerically that the PI- ALINEA performs better than the original ALINEA. The ALINEA has been incorporated in  several coordinated ramp metering algorithms, such as METALINE and HERO [14, 15]."
+        }
+      ]
+    },
+    {
+      "page_number": 3,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p3_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "3"
+        },
+        {
+          "block_id": "p3_b1",
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            169.64
+          ],
+          "type": "paragraph",
+          "text": "The optimization-based approaches optimize signal timings based on real-time traffic  data. The model predictive control framework, which considers the interactions between ramp  metering and future traffic states, is often employed to predict traffic evolution for proactive  traffic controls. Nevertheless, the models used to describe traffic dynamics may lead to  nonlinear control problems, which brings the difficulty in finding the optimal signal timings  [16-18]. In addition, the effectiveness of the ramp metering strategy depends on the degree of  the fitness of the models to the actual traffic dynamics."
+        },
+        {
+          "block_id": "p3_b2",
+          "bbox": [
+            72.0,
+            167.28,
+            525.96,
+            376.64
+          ],
+          "type": "paragraph",
+          "text": "The RL based approaches search for a policy that determines the signal timings based  on the current traffic state. Existing RL-based ramp metering approaches were mainly  developed based on value-based RL methods, such as the Q-learning algorithm. They evaluate  the value of policy given each state-action pair   and improve the policy with a heuristic search.  The actions usually refer to the metering rate or signal phase selection. The states are  represented by traffic measures, such as traffic density and volume. The downstream and  upstream traffic flow, ramp queue length, and traffic density are often selected to define the  control reward [19-22]. The RL has also been introduced for coordinated ramp metering [23,  24]. Note that existing RL methods for ramp metering were driven by traditional traffic  measures. To the best of our knowledge, no studies have attempted to automatically extract  information from traffic videos and learns the optimal control strategies directly from the visual  inputs for ramp metering. Some studies have considered traffic video data as inputs in the RL  framework for intersection signal controls [25-27]. Nevertheless, the elements in the RL  framework, such as the action, reward, and state, for ramp metering and intersection signal  controls are different."
+        },
+        {
+          "block_id": "p3_b3",
+          "bbox": [
+            72.0,
+            387.89,
+            154.11,
+            407.33
+          ],
+          "type": "heading",
+          "text": "Methodology"
+        },
+        {
+          "block_id": "p3_b4",
+          "bbox": [
+            72.0,
+            418.32,
+            525.96,
+            544.88
+          ],
+          "type": "paragraph",
+          "text": "We propose a DRL method for local ramp metering based on traffic video data. The proposed  method adopts a flexible two-phase control scheme, which is illustrated in Fig. 1. A policy  trained from the DRL determines whether the phase in the next time step is green or red at a  fixed time step  L  based on current traffic state. The adopted control scheme is conceivably  more flexible than the conventional \u201cstop-and-go\u201d scheme with fixed red and green phases  flashing alternately. To reduce the computation burden, traffic video frames are used as control  inputs. Vehicle locations from raw images are extracted to reconstruct visual representations  in the DRL method [25]."
+        },
+        {
+          "block_id": "p3_b5",
+          "bbox": [
+            236.32,
+            587.27,
+            276.2,
+            602.29
+          ],
+          "type": "paragraph",
+          "text": "Stop Bar"
+        },
+        {
+          "block_id": "p3_b6",
+          "bbox": [
+            304.56,
+            611.59,
+            398.97,
+            626.61
+          ],
+          "type": "paragraph",
+          "text": "Current phase: green"
+        },
+        {
+          "block_id": "p3_b7",
+          "bbox": [
+            85.58,
+            664.28,
+            130.53,
+            679.31
+          ],
+          "type": "paragraph",
+          "text": "Time step"
+        },
+        {
+          "block_id": "p3_b8",
+          "bbox": [
+            79.28,
+            644.84,
+            133.72,
+            659.87
+          ],
+          "type": "paragraph",
+          "text": "Signal State"
+        },
+        {
+          "block_id": "p3_b9",
+          "bbox": [
+            72.0,
+            664.28,
+            506.88,
+            694.76
+          ],
+          "type": "paragraph",
+          "text": "t - L   t   t+L   t+ 2 L   t -2 L"
+        },
+        {
+          "block_id": "p3_b10",
+          "bbox": [
+            185.28,
+            692.72,
+            412.17,
+            706.14
+          ],
+          "type": "figure_caption",
+          "text": "Figure 1: Two-phase control scheme for ramp metering."
+        },
+        {
+          "block_id": "p3_b11",
+          "bbox": [
+            72.0,
+            707.88,
+            525.96,
+            765.44
+          ],
+          "type": "figure_caption",
+          "text": "Fig. 2 illustrates the ramp metering problem in the general scheme of RL. The ramp  meter acts as the agent to interact with the environment, namely the traffic system including  the mainline and the on-ramp. The ramp meter takes certain control action  a  based on current"
+        }
+      ]
+    },
+    {
+      "page_number": 4,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p4_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "4"
+        },
+        {
+          "block_id": "p4_b1",
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            155.96
+          ],
+          "type": "paragraph",
+          "text": "traffic state  s . Then the traffic system responds to the control action with the state transition  from  s  to  s ' .  The ramp meter obtains reward  r  that quantifies the effect of the control action  a   given state  s . In the RL field, the interaction process is assumed to be a Markov Decision  Process [28]. That is, given current state  s  and action  a , the following state  s '  and reward  r  are  independent of previous states and actions."
+        },
+        {
+          "block_id": "p4_b2",
+          "bbox": [
+            258.36,
+            158.03,
+            308.65,
+            171.51
+          ],
+          "type": "paragraph",
+          "text": "Ramp meter"
+        },
+        {
+          "block_id": "p4_b3",
+          "bbox": [
+            267.54,
+            169.82,
+            299.3,
+            183.3
+          ],
+          "type": "paragraph",
+          "text": "(Agent)"
+        },
+        {
+          "block_id": "p4_b4",
+          "bbox": [
+            253.42,
+            247.61,
+            313.52,
+            272.89
+          ],
+          "type": "paragraph",
+          "text": "Traffic system (Environment)"
+        },
+        {
+          "block_id": "p4_b5",
+          "bbox": [
+            179.36,
+            207.89,
+            415.14,
+            223.03
+          ],
+          "type": "paragraph",
+          "text": "Control Action  a State  s Reward  r"
+        },
+        {
+          "block_id": "p4_b6",
+          "bbox": [
+            393.69,
+            231.59,
+            481.24,
+            245.07
+          ],
+          "type": "paragraph",
+          "text": "Change environment"
+        },
+        {
+          "block_id": "p4_b7",
+          "bbox": [
+            402.86,
+            222.74,
+            469.52,
+            278.59
+          ],
+          "type": "paragraph",
+          "text": "from state  s  to  s \u2019"
+        },
+        {
+          "block_id": "p4_b8",
+          "bbox": [
+            188.04,
+            264.6,
+            493.8,
+            289.5
+          ],
+          "type": "figure_caption",
+          "text": "Figure 2: Ramp metering in the general scheme of RL."
+        },
+        {
+          "block_id": "p4_b9",
+          "bbox": [
+            72.0,
+            280.36,
+            525.96,
+            349.04
+          ],
+          "type": "paragraph",
+          "text": "The RL method aims at training the agent (Ramp meter) to find an optimal policy  \ud835\udf0b\ud835\udf0b \u2217   that maximizes the discounted cumulative reward  G t  after time step  t . To achieve that goal, one  approach is to learn the optimal action-value function  Q*   ( s ,  a ), which is defined by:"
+        },
+        {
+          "block_id": "p4_b10",
+          "bbox": [
+            72.0,
+            345.72,
+            525.96,
+            399.08
+          ],
+          "type": "paragraph",
+          "text": "( ) [ ] * , max | , t t t Q s   a G s s   a a \u03c0 \u03c0 = = = \uf045   (1)  where  \u03c0  is a policy mapping traffic states to control actions. Once  Q*   ( s ,  a ) is found, the action  to be taken can be obtained by:"
+        },
+        {
+          "block_id": "p4_b11",
+          "bbox": [
+            72.0,
+            371.56,
+            525.96,
+            496.28
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udf0b\ud835\udf0b \u2217 (\ud835\udc60\ud835\udc60) = argmax \ud835\udc4e\ud835\udc4e \u2032 \ud835\udc44\ud835\udc44 \u2217 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e \u2032 )   (2)  The process of learning policy from the action-value function  Q  is termed  Q -learning.  The key step in  Q -learning is to estimate  Q*   ( s ,  a ). To better capture the traffic features in video  data, we adopt a deep neural network termed  Q -network to approximate  Q*   ( s ,  a ). The neural  network contains serval convolutional layers and fully-connected layers. The convolutional  layers extract traffic features from the video frames and the full-connected layers estimate the  Q value based on the output of convolutional layers."
+        },
+        {
+          "block_id": "p4_b12",
+          "bbox": [
+            72.0,
+            507.77,
+            291.0,
+            524.38
+          ],
+          "type": "paragraph",
+          "text": "State, Action, and Reward Representation"
+        },
+        {
+          "block_id": "p4_b13",
+          "bbox": [
+            72.0,
+            535.68,
+            525.96,
+            689.33
+          ],
+          "type": "paragraph",
+          "text": "1) Action  The ramp meter takes two possible actions at fixed time step  L  to determine whether  the phase in the next time step is green (G) or red (R), namely action set  \ud835\udc9c\ud835\udc9c= {\ud835\udc3a\ud835\udc3a, \ud835\udc45\ud835\udc45} .    2) State  Fig. 3 illustrates the process of obtaining visual representations from the raw images to  represent traffic states. Considering a control area of size  \ud835\udc4b\ud835\udc4b\u00d7 \ud835\udc4c\ud835\udc4c  as shown in Fig. 3a, the  position of each vehicle  i   (\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 )  is extracted from the raw images. Traffic state at times step  t   is represented by a position matrix  \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 \u2208\u211d \ud835\udc4b\ud835\udc4b\u00d7\ud835\udc4c\ud835\udc4c :"
+        },
+        {
+          "block_id": "p4_b14",
+          "bbox": [
+            72.0,
+            635.92,
+            520.56,
+            705.2
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 ) = \ud835\udc48\ud835\udc48 \ud835\udc49\ud835\udc49 ,  \ud835\udc56\ud835\udc56\u2208\ud835\udc3c\ud835\udc3c \ud835\udc61\ud835\udc61   (3)  U V  is a constant and  I t   refers to the vehicles set."
+        }
+      ]
+    },
+    {
+      "page_number": 5,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p5_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "5"
+        },
+        {
+          "block_id": "p5_b1",
+          "bbox": [
+            108.0,
+            319.56,
+            510.48,
+            376.16
+          ],
+          "type": "figure_caption",
+          "text": "Figure 3: State representation.    The position matrix additionally contains the information of the signal states:"
+        },
+        {
+          "block_id": "p5_b2",
+          "bbox": [
+            201.24,
+            347.8,
+            350.64,
+            422.69
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 ) =  \u0d5c \ud835\udc48\ud835\udc48 \ud835\udc3a\ud835\udc3a  if \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61\u22121   = \ud835\udc3a\ud835\udc3a"
+        },
+        {
+          "block_id": "p5_b3",
+          "bbox": [
+            277.2,
+            362.68,
+            520.56,
+            432.05
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc48\ud835\udc48 \ud835\udc45\ud835\udc45  if \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61\u22121   = \ud835\udc45\ud835\udc45   (4)"
+        },
+        {
+          "block_id": "p5_b4",
+          "bbox": [
+            72.0,
+            376.12,
+            525.96,
+            443.57
+          ],
+          "type": "paragraph",
+          "text": "(\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 )  is the position of signal light in images and  \ud835\udc48\ud835\udc48 \ud835\udc3a\ud835\udc3a  and  \ud835\udc48\ud835\udc48 \ud835\udc45\ud835\udc45  are constants to represent  actions execute in time step  t -1."
+        },
+        {
+          "block_id": "p5_b5",
+          "bbox": [
+            111.0,
+            404.44,
+            343.44,
+            471.41
+          ],
+          "type": "paragraph",
+          "text": "The other elements in matrix  \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61  are set to zero:"
+        },
+        {
+          "block_id": "p5_b6",
+          "bbox": [
+            147.12,
+            418.0,
+            520.56,
+            485.45
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65, \ud835\udc66\ud835\udc66) = 0 ,  (\ud835\udc65\ud835\udc65, \ud835\udc66\ud835\udc66) \u2209{(\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 )|\ud835\udc56\ud835\udc56\u2208\ud835\udc3c\ud835\udc3c \ud835\udc61\ud835\udc61 } \u222a{(\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 )}   (5)"
+        },
+        {
+          "block_id": "p5_b7",
+          "bbox": [
+            72.0,
+            471.36,
+            524.76,
+            501.32
+          ],
+          "type": "paragraph",
+          "text": "Since one matrix is insufficient to describe vehicle dynamics, we stack the matrices of  consecutive  N  time steps to represent the state  s t :"
+        },
+        {
+          "block_id": "p5_b8",
+          "bbox": [
+            215.52,
+            475.36,
+            520.56,
+            542.33
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61 =  \u0d5b \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61\u2212\ud835\udc3f\ud835\udc3f(\ud835\udc41\ud835\udc41\u22121) , \u22ef, \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 \u0d5f   (6)"
+        },
+        {
+          "block_id": "p5_b9",
+          "bbox": [
+            72.0,
+            529.68,
+            525.96,
+            656.24
+          ],
+          "type": "paragraph",
+          "text": "For computation efficiency, down-sampling is introduced before the matrix stack to  reduce the input dimensions and maintain sufficient information about vehicle positions.    3) Reward  The reward is critical since it motivates the agent to approach the objective. Vehicle travel  times through the system are good measures of vehicle mobility. But they are not suitable  rewards since they are greatly influenced by previous actions and cannot well quantify the  value of the current action. Alternatively, the speed   in the merging area and the queue length  at the on-ramp are adopted to define the reward. The reward  r t  after action  a t  is defined by:"
+        },
+        {
+          "block_id": "p5_b10",
+          "bbox": [
+            72.0,
+            629.68,
+            525.96,
+            728.48
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 = \u2211 \u0d6b \ud835\udf07\ud835\udf07\ud835\udf07\ud835\udf07 \ud835\udc57\ud835\udc57 + \ud835\udf14\ud835\udf14\ud835\udc5e\ud835\udc5e \ud835\udc57\ud835\udc57 \u0d6f \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f \ud835\udc57\ud835\udc57=\ud835\udc61\ud835\udc61+1 \ud835\udc3f\ud835\udc3f \u2044   ,  \ud835\udf07\ud835\udf07> 0 ,  \ud835\udf14\ud835\udf14< 0   (7)  where  v j  and  q j  represent the speed in the merging area and the queue length at the on-ramp at  time step  j , respectively. Positive  \u03bc  and negative  \u03c9  denote the reward weights for the speed and  the queue length, respectively. The defined rewards balance the priority needs between  improving vehicle mobility in the mainline and reducing vehicle delays at the on-ramp."
+        }
+      ]
+    },
+    {
+      "page_number": 6,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p6_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "6"
+        },
+        {
+          "block_id": "p6_b1",
+          "bbox": [
+            72.0,
+            70.49,
+            128.28,
+            87.1
+          ],
+          "type": "paragraph",
+          "text": "Algorithm"
+        },
+        {
+          "block_id": "p6_b2",
+          "bbox": [
+            72.0,
+            98.52,
+            525.96,
+            128.48
+          ],
+          "type": "paragraph",
+          "text": "The training problem can be viewed as the regression problem with the loss function defined  by:"
+        },
+        {
+          "block_id": "p6_b3",
+          "bbox": [
+            189.17,
+            127.97,
+            360.57,
+            150.29
+          ],
+          "type": "paragraph",
+          "text": "( ) ( ) ( ) ( )"
+        },
+        {
+          "block_id": "p6_b4",
+          "bbox": [
+            360.84,
+            129.25,
+            364.33,
+            138.86
+          ],
+          "type": "paragraph",
+          "text": "2"
+        },
+        {
+          "block_id": "p6_b5",
+          "bbox": [
+            181.06,
+            129.25,
+            520.56,
+            155.3
+          ],
+          "type": "paragraph",
+          "text": ", * , ,   , i s   a i L   w Q s   a Q   s   a   w \uf8ee \uf8f9 = \u2212 \uf8f0 \uf8fb \uf045   (8)"
+        },
+        {
+          "block_id": "p6_b6",
+          "bbox": [
+            72.0,
+            154.92,
+            525.96,
+            198.68
+          ],
+          "type": "paragraph",
+          "text": "where  Q*   ( s ,  a ) is approximated by a deep neural network.  w i  denotes the weights in the deep  neural network after the  i th  update. The gradient-based algorithm ADAM [29] is used to update  w i  to minimize the loss function."
+        },
+        {
+          "block_id": "p6_b7",
+          "bbox": [
+            72.0,
+            196.32,
+            527.28,
+            295.28
+          ],
+          "type": "paragraph",
+          "text": "Although   Q -network could handle large state space, it raises the problem of instability  in training [30]. Two approaches have been proposed to resolve the problem, illustrated in Fig.  4. The experience replay [31] stores the data prepared for training into the replay buffer and  samples these data uniformly for training the agent. It contributes to making the training data  independently and identically distributed. The target network [30] is introduced for a stable  estimation of target value  Q*  ( s ,  a ). When  Q- network is being trained, the target network is  freezing. Its parameters are updated by copying those in  Q -network with a certain frequency."
+        },
+        {
+          "block_id": "p6_b8",
+          "bbox": [
+            72.0,
+            292.92,
+            525.96,
+            378.08
+          ],
+          "type": "paragraph",
+          "text": "A multi-task learning strategy is implemented in the training process to improve  learning efficiency. While training the ramp metering Q-network, the mean speed in the  merging area and the queue length at the on-ramp are predicted simultaneously. The fully- connected layer in the Q-network in multi-task learning is extended to two layers to calculate  the Q-value and predict the speed and queue length, respectively. The loss function is redefined  as follows."
+        },
+        {
+          "block_id": "p6_b9",
+          "bbox": [
+            176.64,
+            354.16,
+            369.83,
+            421.61
+          ],
+          "type": "paragraph",
+          "text": "\u2112 1 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \ud835\udd3c\ud835\udd3c \ud835\udc60\ud835\udc60,\ud835\udc4e\ud835\udc4e \u0d6b\ud835\udc44\ud835\udc44 \u2217 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e) \u2212\ud835\udc44\ud835\udc44 0 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u0d6f"
+        },
+        {
+          "block_id": "p6_b10",
+          "bbox": [
+            72.0,
+            357.44,
+            525.96,
+            481.76
+          ],
+          "type": "paragraph",
+          "text": "2   (8)  \u2112 2 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \ud835\udd3c\ud835\udd3c \ud835\udc60\ud835\udc60,\ud835\udc4e\ud835\udc4e ((\ud835\udc44\ud835\udc44 1 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u2212\ud835\udc63\ud835\udc63) 2   + (\ud835\udc44\ud835\udc44 2 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u2212\ud835\udc62\ud835\udc62) 2 )   (9)  \u2112(\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \u2112 1 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) + \ud835\udf06\ud835\udf06\u2112 2 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 )   (10)  where  \ud835\udc44\ud835\udc44 0 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) ,  \ud835\udc44\ud835\udc44 1 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ), \ud835\udc44\ud835\udc44 2 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 )  represent the prediction values of the action- value function, mean speed, and queue length, respectively.  u  and  v  refer to the ground truth of  the speed and queue length, respectively."
+        },
+        {
+          "block_id": "p6_b11",
+          "bbox": [
+            378.82,
+            481.02,
+            388.31,
+            496.63
+          ],
+          "type": "paragraph",
+          "text": "b)"
+        },
+        {
+          "block_id": "p6_b12",
+          "bbox": [
+            318.67,
+            551.82,
+            501.38,
+            572.26
+          ],
+          "type": "paragraph",
+          "text": "Q- network Target  network trained freezing"
+        },
+        {
+          "block_id": "p6_b13",
+          "bbox": [
+            379.41,
+            598.53,
+            453.35,
+            618.96
+          ],
+          "type": "paragraph",
+          "text": "update target network with certain frequency"
+        },
+        {
+          "block_id": "p6_b14",
+          "bbox": [
+            146.89,
+            565.64,
+            167.07,
+            576.31
+          ],
+          "type": "paragraph",
+          "text": "Agent"
+        },
+        {
+          "block_id": "p6_b15",
+          "bbox": [
+            135.44,
+            621.29,
+            178.51,
+            631.96
+          ],
+          "type": "paragraph",
+          "text": "Environment"
+        },
+        {
+          "block_id": "p6_b16",
+          "bbox": [
+            102.83,
+            593.98,
+            214.45,
+            604.69
+          ],
+          "type": "paragraph",
+          "text": "Action  a State  s Reward  r"
+        },
+        {
+          "block_id": "p6_b17",
+          "bbox": [
+            184.11,
+            613.82,
+            223.92,
+            658.06
+          ],
+          "type": "paragraph",
+          "text": "New state  s \u2019"
+        },
+        {
+          "block_id": "p6_b18",
+          "bbox": [
+            142.77,
+            506.9,
+            224.16,
+            519.61
+          ],
+          "type": "paragraph",
+          "text": "Sample Training"
+        },
+        {
+          "block_id": "p6_b19",
+          "bbox": [
+            150.1,
+            518.69,
+            163.58,
+            529.37
+          ],
+          "type": "paragraph",
+          "text": "data"
+        },
+        {
+          "block_id": "p6_b20",
+          "bbox": [
+            236.33,
+            589.51,
+            292.94,
+            633.75
+          ],
+          "type": "paragraph",
+          "text": "Store < s ,  a ,  r ,  s \u2019 >"
+        },
+        {
+          "block_id": "p6_b21",
+          "bbox": [
+            126.82,
+            533.19,
+            153.88,
+            553.62
+          ],
+          "type": "paragraph",
+          "text": "Update  weights"
+        },
+        {
+          "block_id": "p6_b22",
+          "bbox": [
+            191.87,
+            479.87,
+            200.73,
+            495.48
+          ],
+          "type": "paragraph",
+          "text": "a)"
+        },
+        {
+          "block_id": "p6_b23",
+          "bbox": [
+            243.53,
+            505.37,
+            295.01,
+            538.01
+          ],
+          "type": "paragraph",
+          "text": "< s t ,  a t ,  r t ,  s t +1 > < s t +1 ,  a t +1 ,  r t +1 ,  s t +2 > < s t +2 ,  a t +2 ,  r t +2 ,  s t +3 > < s t +3 ,  a t +3 ,  r t +3 ,  s t +4 >"
+        },
+        {
+          "block_id": "p6_b24",
+          "bbox": [
+            265.91,
+            536.6,
+            274.42,
+            545.63
+          ],
+          "type": "paragraph",
+          "text": "\u2026"
+        },
+        {
+          "block_id": "p6_b25",
+          "bbox": [
+            247.49,
+            491.97,
+            292.86,
+            502.65
+          ],
+          "type": "paragraph",
+          "text": "Replay buffer"
+        },
+        {
+          "block_id": "p6_b26",
+          "bbox": [
+            319.01,
+            504.3,
+            483.1,
+            522.74
+          ],
+          "type": "paragraph",
+          "text": "( ) ( )"
+        },
+        {
+          "block_id": "p6_b27",
+          "bbox": [
+            483.23,
+            506.35,
+            485.41,
+            512.06
+          ],
+          "type": "paragraph",
+          "text": "2"
+        },
+        {
+          "block_id": "p6_b28",
+          "bbox": [
+            314.01,
+            506.33,
+            489.51,
+            525.74
+          ],
+          "type": "paragraph",
+          "text": ",   ~ ;   , ~ E max (   , , ) (   ,   , ) i s   a r   s i a L   w r Q   s   a   w Q   s   a   w \u03c1 \u03b6 \u03b3 \u2212 \u2032 \u2032 \uf8ee \uf8f9 \u2032 \u2032 = + \u2212 \uf8ef \uf8fa \uf8f0 \uf8fb"
+        },
+        {
+          "block_id": "p6_b29",
+          "bbox": [
+            72.0,
+            634.08,
+            524.83,
+            676.88
+          ],
+          "type": "figure_caption",
+          "text": "Figure 4: 4 Approaches for stabilizing the training process in deep  Q -learning: a) relay buffer; b) target network."
+        },
+        {
+          "block_id": "p6_b30",
+          "bbox": [
+            72.0,
+            674.52,
+            525.96,
+            732.08
+          ],
+          "type": "paragraph",
+          "text": "The algorithm for training the ramp metering policy is presented in Table 1. The ramp  meter takes new action with the  \u03b5 -greedy strategy, meaning that the agent does not always  adopt the best action  derived  from current  Q  ( s ,  a ,  w ). Doing so is helpful to explore unknown  policies that may be better."
+        }
+      ]
+    },
+    {
+      "page_number": 7,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p7_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "7"
+        },
+        {
+          "block_id": "p7_b1",
+          "bbox": [
+            207.36,
+            70.84,
+            392.49,
+            84.63
+          ],
+          "type": "table_caption",
+          "text": "Table 1: Deep Q-learning for ramp metering."
+        },
+        {
+          "block_id": "p7_b2",
+          "bbox": [
+            77.64,
+            86.5,
+            421.92,
+            101.78
+          ],
+          "type": "paragraph",
+          "text": "Input:  Batch size  k , Learning rate  \u03b7 , Decision step size  L , Exploration rate  \u03b5 ,"
+        },
+        {
+          "block_id": "p7_b3",
+          "bbox": [
+            77.63,
+            99.4,
+            348.6,
+            214.4
+          ],
+          "type": "paragraph",
+          "text": "Freezing interval  F , Number of training episode  N ,   Number of training time steps  T  in one episode   Fill the replay buffer   randomly  Initialize the action-value function  Q  with random weights  w   Initialize the target network  Q \u2013   with weights  w \u2013  =  w  \ud835\udc53\ud835\udc53\u21900   for  episode =  {1, \u22ef, \ud835\udc41\ud835\udc41}"
+        },
+        {
+          "block_id": "p7_b4",
+          "bbox": [
+            77.63,
+            165.27,
+            403.32,
+            382.42
+          ],
+          "type": "paragraph",
+          "text": "for   t  =  {1, \u22ef, \ud835\udc47\ud835\udc47}       if  mod ( t ,  L ) == 0             Observe state  s t   and choose action  a t   by \u03b5-greedy strategy          Execute action  a t , obtain reward  \ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 , state   \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f           Store transition < \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61 ,  \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61 ,  \ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 ,  \ud835\udc63\ud835\udc63 \ud835\udc61\ud835\udc61   ,  \ud835\udc62\ud835\udc62 \ud835\udc61\ud835\udc61 ,  \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f > into replay buffer          Uniformly sample  k  transitions from replay buffer          Compute the gradient  \u2207 \ud835\udc64\ud835\udc64 (\u2112 1  + \ud835\udf06\ud835\udf06\u2112 2 )           Update weights  w  in  Q -network by ADAM with learning rate  \u03b7           \ud835\udc53\ud835\udc53\u2190\ud835\udc53\ud835\udc53+ 1            end if           if  mod ( f ,  F ) == 0               Update target network  Q \u2013  :  w \u2013 \u2190   w             end if        end for  end for"
+        },
+        {
+          "block_id": "p7_b5",
+          "bbox": [
+            72.0,
+            393.65,
+            144.03,
+            413.09
+          ],
+          "type": "heading",
+          "text": "Case study"
+        },
+        {
+          "block_id": "p7_b6",
+          "bbox": [
+            72.0,
+            424.01,
+            134.04,
+            440.62
+          ],
+          "type": "paragraph",
+          "text": "Case set-up"
+        },
+        {
+          "block_id": "p7_b7",
+          "bbox": [
+            72.0,
+            451.92,
+            525.96,
+            523.28
+          ],
+          "type": "paragraph",
+          "text": "The proposed method is evaluated in SUMO, an open-source microscopic traffic  simulator [32]. The simulation is performed in the freeway connecting Qingdao and Huangdao  through a tunnel in Shandong, China, as shown in Fig. 5. The one-lane on-ramp and the  upstream three-lane mainline merge. And the freeway gradually reduces to three lanes in the  downstream segments."
+        }
+      ]
+    },
+    {
+      "page_number": 8,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p8_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "8"
+        },
+        {
+          "block_id": "p8_b1",
+          "bbox": [
+            191.16,
+            417.48,
+            490.2,
+            442.38
+          ],
+          "type": "figure_caption",
+          "text": "Figure 5: Road network considered in the case study."
+        },
+        {
+          "block_id": "p8_b2",
+          "bbox": [
+            72.0,
+            443.93,
+            525.96,
+            543.08
+          ],
+          "type": "paragraph",
+          "text": "The simulation considers the road network covering the on-ramp, the upstream and  downstream mainlines, and the merging area. The speed limits in the mainline and at the on- ramp are 80 and 40 km/h, respectively. The simulation parameters regarding driving behaviors  are calibrated based on empirical data. The simulation time is 7:50 a.m. to 9:00 a.m. Figure 6  presents the 10-min traffic volumes from 7:50 a.m. to 9:00 a.m. in the mainline and at the on- ramp."
+        },
+        {
+          "block_id": "p8_b4",
+          "bbox": [
+            72.0,
+            714.36,
+            470.76,
+            757.42
+          ],
+          "type": "figure_caption",
+          "text": "Figure 6: Traffic volumes in the mainline and the on-ramp."
+        },
+        {
+          "block_id": "p8_b6",
+          "bbox": [
+            85.6,
+            283.36,
+            135.2,
+            298.76
+          ],
+          "type": "paragraph",
+          "text": "Three-lane"
+        },
+        {
+          "block_id": "p8_b7",
+          "bbox": [
+            91.79,
+            297.11,
+            131.75,
+            312.51
+          ],
+          "type": "paragraph",
+          "text": "mainline"
+        },
+        {
+          "block_id": "p8_b8",
+          "bbox": [
+            391.66,
+            332.87,
+            444.13,
+            348.27
+          ],
+          "type": "paragraph",
+          "text": "Three-lane"
+        },
+        {
+          "block_id": "p8_b9",
+          "bbox": [
+            396.48,
+            346.62,
+            436.44,
+            362.02
+          ],
+          "type": "paragraph",
+          "text": "mainline"
+        },
+        {
+          "block_id": "p8_b10",
+          "bbox": [
+            162.42,
+            287.25,
+            204.64,
+            302.65
+          ],
+          "type": "paragraph",
+          "text": "Merging"
+        },
+        {
+          "block_id": "p8_b11",
+          "bbox": [
+            172.58,
+            301.0,
+            191.62,
+            316.4
+          ],
+          "type": "paragraph",
+          "text": "area"
+        },
+        {
+          "block_id": "p8_b12",
+          "bbox": [
+            335.17,
+            278.55,
+            380.06,
+            293.95
+          ],
+          "type": "paragraph",
+          "text": "One-lane"
+        },
+        {
+          "block_id": "p8_b13",
+          "bbox": [
+            336.81,
+            292.3,
+            375.43,
+            307.7
+          ],
+          "type": "paragraph",
+          "text": "on-ramp"
+        },
+        {
+          "block_id": "p8_b14",
+          "bbox": [
+            142.14,
+            371.43,
+            189.93,
+            400.51
+          ],
+          "type": "paragraph",
+          "text": "Curbside Centerline"
+        },
+        {
+          "block_id": "p8_b15",
+          "bbox": [
+            189.54,
+            230.9,
+            379.97,
+            246.29
+          ],
+          "type": "paragraph",
+          "text": "Road network modelled in the simulation"
+        }
+      ]
+    },
+    {
+      "page_number": 9,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p9_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "9"
+        },
+        {
+          "block_id": "p9_b1",
+          "bbox": [
+            72.0,
+            59.8,
+            525.96,
+            142.28
+          ],
+          "type": "paragraph",
+          "text": "The agent\u2019s observation in DRL covers the simulated road network. After zooming and  down-sampling, the size of one observation is 4 \u00d7 512 in pixels. One observation is stacked with  those in the previous two steps to represent the traffic state. The  Q -network in [31] is revised  as Fig. 7 to accommodate the input size for ramp metering. The other parameters in the deep  Q -learning for ramp metering are listed in Table 2."
+        },
+        {
+          "block_id": "p9_b3",
+          "bbox": [
+            203.52,
+            223.56,
+            508.44,
+            248.46
+          ],
+          "type": "figure_caption",
+          "text": "Figure 7: Structure of the deep neural network."
+        },
+        {
+          "block_id": "p9_b5",
+          "bbox": [
+            167.28,
+            262.04,
+            430.17,
+            275.46
+          ],
+          "type": "table_caption",
+          "text": "Table 2:  Key parameters in Deep  Q -learning for Ramp Metering"
+        },
+        {
+          "block_id": "p9_b6",
+          "bbox": [
+            72.0,
+            278.76,
+            525.96,
+            531.44
+          ],
+          "type": "paragraph",
+          "text": "Parameters  Value  Replay buffer size  B  2\u00d710 5   Learning rate  \u03b7   2.5\u00d710 -4   Batch size  k   32  Exploration rate  \u03b5   0.1  Freeze interval  F   10 4   Decision step size  L   4 s  Reward weight  \u03bc   0.5  Reward weight  \u03c9   -0.1    The  Q -network in the proposed method is trained in 10 6  training frames. For comparison  purposes, two scenarios are also considered in the evaluation. The first scenario does not apply  ramp metering and the second scenario adopts the PI-ALINEA method. The PI-ALINEA  method fixes the length of the green phase and determines the length of the red phase in the  current signal cycle based on the length of the red phase in the previous cycle and the  downstream occupancies in the previous and current cycles. The parameters are fine-tuned to  minimize mean travel times in the traffic system. Each scenario is evaluated in 20 simulation  experiments, each of which is initialized with different random seeds."
+        },
+        {
+          "block_id": "p9_b7",
+          "bbox": [
+            72.0,
+            542.93,
+            219.72,
+            559.54
+          ],
+          "type": "paragraph",
+          "text": "Evaluation and Comparison"
+        },
+        {
+          "block_id": "p9_b8",
+          "bbox": [
+            72.0,
+            570.96,
+            525.96,
+            738.92
+          ],
+          "type": "figure_caption",
+          "text": "Fig. 8 presents the Q1 (25%), Q2 (50%), and Q3 (75%) of the travel times in the  mainline for three scenarios. The results demonstrate that ramp metering not only reduces  vehicle travel times but also improves the stability of traffic flows in the mainline. The resulting  travel times are close when the demand is low at the beginning (8:00-8:10). With the increase  of the demand, the median travel time increases faster in the no-control scenario and reaches  the maximum value of 4.25 min at 8:28. The maximum values of the median travel times  resulting from the PI-ALINEA method and the DRL method are 3.75 min and 3.4 min,  respectively, which are 11.7% and 20% lower than that in the no-control scenario. As the  demand decreases, the travel times of the three scenarios decrease to similar levels. In addition,  all the ramp metering methods narrow the interquartile ranges (Q3-Q1) of the travel times.  Overall, the proposed DRL method results in shorter travel times with narrower travel time  ranges than that of the fine-tuned PI-ALINEA method."
+        }
+      ]
+    },
+    {
+      "page_number": 10,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p10_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "10"
+        },
+        {
+          "block_id": "p10_b1",
+          "bbox": [
+            72.0,
+            197.88,
+            525.96,
+            337.28
+          ],
+          "type": "figure_caption",
+          "text": "Figure 8: Vehicle travel times in the mainline.    Table 3 presents mean vehicle travel times in 20 simulation experiments. It is found that  the performance of the PI-ALINEA method is not always better than the no-control scenario.  For example, compared with the no-control scenario, the PI-ALINEA method increases vehicle  travel time by 10% in the 6 th  experiment. In contrast, the proposed DRL method consistently  results in shorter travel time than that of the no-control scenario, demonstrating the stable  performance of the proposed method. On average, the DRL method reduces vehicle travel time  by 13% when compared with the no-control scenario."
+        },
+        {
+          "block_id": "p10_b3",
+          "bbox": [
+            176.4,
+            349.04,
+            421.05,
+            362.46
+          ],
+          "type": "table_caption",
+          "text": "Table 3:  Mean travel times in 20 simulation experiments (s)"
+        },
+        {
+          "block_id": "p10_b4",
+          "bbox": [
+            77.4,
+            365.76,
+            503.88,
+            395.72
+          ],
+          "type": "paragraph",
+          "text": "No.  No  controls  PI-ALINEA  DRL  No.  No  controls  PI-ALINEA  DRL"
+        },
+        {
+          "block_id": "p10_b5",
+          "bbox": [
+            72.0,
+            393.84,
+            525.96,
+            646.16
+          ],
+          "type": "paragraph",
+          "text": "1  186  179 [-4%]  171 [-8%]  11  188  173[-8%]  167[-11%]  2  203  173[-15%]  171[-16%]  12  211  182[-14%]  170[-19%]  3  217  175[-19%]  177[-18%]  13  219  175[-20%]  172[-21%]  4  227  181[-20%]  181[-20%]  14  170  172[+1%]   170[-0%]  5  202  173[-14%]  177[-12%]  15  187  182[-3%]  175[-6%]  6  178  195 [+10%]   173[-3%]  16  216  170[-21%]  179[-17%]  7  185  178[-4%]  174[-6%]  17  177  192[+8%]   174[-2%]  8  226  180[-20%]  173[-23%]  18  228  169[-26%]  172[-25%]  9  175  214 [+22%]   169[-3%]  19  190  179[-6%]  175[-8%]  10  206  183[-11%]  175[-15%]  20  194  180[-7%]  170[-12%]    Fig.9 presents the temporal-spatial distribution of the mean speeds along the mainline.  The results further demonstrate the efficiency of the ramp metering and the better performance  of the proposed method. In the no-control scenario, the minimum speed in the mainline is 12  m/s (43.2/h). The minimum speeds resulting from the PI-ALINEA method and the DRL  method are 13.3% and 20% higher than that in the no-control scenario, respectively. The area  with speed lower than 15 m/s (54km/h) is reduced with the PI-ALINEA method, which is  further reduced when the DRL method is implemented."
+        }
+      ]
+    },
+    {
+      "page_number": 11,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p11_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "11"
+        },
+        {
+          "block_id": "p11_b1",
+          "bbox": [
+            72.0,
+            475.08,
+            525.96,
+            614.48
+          ],
+          "type": "figure_caption",
+          "text": "Figure 9: Temporal-spatial distribution of speed in a) No-control, b) PI-ALINEA c) DRL.    Fig. 10 presents the Q1, Q2, and Q3 of the queue lengths at the on-ramp in three  scenarios. The results reveal that ramp metering improves vehicle mobility in the mainline at  the cost of delays of vehicles at the on-ramp. Without ramp metering, no vehicle queues are  formed at the on-ramp. Both ramp metering methods result in vehicle queues at the on-ramp.  Nevertheless, the queues produced by the proposed method are shorter than those produced by  the PI-ALINEA method. When the PI-ALINEA method and the proposed DRL method are  adopted, the maximum values of the Q3 of the queue lengths are 126 m and 67 m, respectively."
+        },
+        {
+          "block_id": "p11_b3",
+          "bbox": [
+            215.4,
+            745.8,
+            508.2,
+            770.7
+          ],
+          "type": "figure_caption",
+          "text": "Figure 10: Queue Length at the on-ramp."
+        }
+      ]
+    },
+    {
+      "page_number": 12,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p12_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "12"
+        },
+        {
+          "block_id": "p12_b1",
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            224.84
+          ],
+          "type": "figure_caption",
+          "text": "Fig.11 presents the queue lengths at the on-ramp and the occupancy downstream of the  merging area for the two ramp metering methods. Fig.11a demonstrates that the queue length  and the occupancy are highly correlated when the PI-ALINEA method is adopted. The results  are understandable. Given high occupancy, the PI-ALINEA method tends to adopt a long red  phase, which would lead to long queues at the on-ramp. In contrast, Fig.11b shows that the  correlation between the queue length and the occupancy is relatively low when the DRL  method is implemented. The queue length over time is relatively stable, ranging from 25-50 m.  Although the occupancy is low after 8:45, the ramp meter is still active. The results indicate  that the proposed DRL method not only relies on downstream occupancy but other information  extracted from raw data."
+        },
+        {
+          "block_id": "p12_b4",
+          "bbox": [
+            72.0,
+            501.96,
+            508.2,
+            544.88
+          ],
+          "type": "figure_caption",
+          "text": "Figure 11: Queue length and occupancy for a) PI-ALINEA and b) DRL."
+        },
+        {
+          "block_id": "p12_b5",
+          "bbox": [
+            72.0,
+            542.52,
+            525.96,
+            613.76
+          ],
+          "type": "figure_caption",
+          "text": "Fig.12 presents the mean queue lengths at the on-ramp and the red ratios ( i.e. , the  proportion of the red phase in the simulation time) in each simulation for the two ramp metering  methods. The queue length generally increases with the red ratio. However, compared with the  PI-ALINEA method, the queues produced by the DRL method are shorter, suggesting that the  proposed method could better utilize the green time."
+        }
+      ]
+    },
+    {
+      "page_number": 13,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p13_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "13"
+        },
+        {
+          "block_id": "p13_b1",
+          "bbox": [
+            72.0,
+            248.33,
+            525.96,
+            415.52
+          ],
+          "type": "figure_caption",
+          "text": "Figure 12: Relationship of queue length and red ratio for a) PI-ALINEA and b) DRL.    The better performance of the proposed DRL method is further revealed when  considering traffic flows downstream of the merge area, which is demonstrated in Fig. 13. At  the beginning traffic flows in three scenarios are close. During the peak period between 8:10- 8:35, the flows resulting from the DRL method are higher and more stable, suggesting that the  proposed DRL method could better alleviate the negative impacts of \u201ccapacity drop\u201d resulting  from massive merging behaviors. When traffic demand decreases during 8:40-9:00, traffic  flows in the two ramp metering scenarios also decline. Nevertheless, traffic flows in the no- control scenario are still high during 8:45-8:55 since more vehicles are held in the system in  the previous periods."
+        },
+        {
+          "block_id": "p13_b3",
+          "bbox": [
+            196.2,
+            571.73,
+            508.2,
+            596.94
+          ],
+          "type": "figure_caption",
+          "text": "Figure 13: Downstream volume in three scenarios."
+        },
+        {
+          "block_id": "p13_b4",
+          "bbox": [
+            72.0,
+            608.21,
+            275.43,
+            627.65
+          ],
+          "type": "heading",
+          "text": "Conclusion and Future Research"
+        },
+        {
+          "block_id": "p13_b5",
+          "bbox": [
+            72.0,
+            638.76,
+            525.96,
+            765.32
+          ],
+          "type": "paragraph",
+          "text": "This study proposes a DRL method for local ramp metering based on traffic video data. The  proposed method learns optimal strategies directly from high-dimensional visual inputs,  overcoming the reliance on hand-crafted traffic measures. The better performance of the  proposed method is demonstrated in a real-world case study. Compared with the traditional PI- ALINEA method, the proposed method results in lower travel times in the mainline, shorter  vehicle queue lengths at the on-ramp, and could better alleviate the negative impacts of  \u201ccapacity drop\u201d resulting from massive merging behaviors. The results suggest that the  proposed DRL method is able to extract useful information from the video data for better ramp  metering controls."
+        }
+      ]
+    },
+    {
+      "page_number": 14,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p14_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "14"
+        },
+        {
+          "block_id": "p14_b1",
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            183.44
+          ],
+          "type": "paragraph",
+          "text": "Although promising, additional research would be required before the proposed method  can be implemented for operational use. We assume that vehicle location information from the  videos is accurate. Actually, the data quality may be disturbed by factors such as weather,  vehicle sizes, and colors. It is valuable to design a ramp metering algorithm that is robust to  those disturbances. In addition, abnormal events, such as accidents, are not considered in this  study. Efficiently training the ramp metering to adapt to abnormal events remains to be  investigated. Finally, extending the proposed method for coordinated ramp metering controls  is worth pursuing."
+        },
+        {
+          "block_id": "p14_b2",
+          "bbox": [
+            72.0,
+            194.69,
+            177.77,
+            214.13
+          ],
+          "type": "heading",
+          "text": "Data Availability"
+        },
+        {
+          "block_id": "p14_b3",
+          "bbox": [
+            72.0,
+            225.12,
+            513.84,
+            255.08
+          ],
+          "type": "paragraph",
+          "text": "The data used to support the results of this study is available from the corresponding author  upon request."
+        },
+        {
+          "block_id": "p14_b4",
+          "bbox": [
+            72.0,
+            266.33,
+            194.56,
+            285.77
+          ],
+          "type": "heading",
+          "text": "Conflicts of Interest"
+        },
+        {
+          "block_id": "p14_b5",
+          "bbox": [
+            72.0,
+            296.88,
+            521.16,
+            326.84
+          ],
+          "type": "paragraph",
+          "text": "The authors declare that there is no conflict of interest regarding the publication of this paper  exists."
+        },
+        {
+          "block_id": "p14_b6",
+          "bbox": [
+            72.0,
+            338.09,
+            190.23,
+            357.53
+          ],
+          "type": "heading",
+          "text": "Funding Statement"
+        },
+        {
+          "block_id": "p14_b7",
+          "bbox": [
+            72.0,
+            368.52,
+            503.4,
+            398.48
+          ],
+          "type": "paragraph",
+          "text": "This work is supported by the National Natural Science Foundation of China (Grant Nos.  71671124, 71901164)."
+        },
+        {
+          "block_id": "p14_b8",
+          "bbox": [
+            72.0,
+            409.73,
+            140.8,
+            429.17
+          ],
+          "type": "heading",
+          "text": "References"
+        },
+        {
+          "block_id": "p14_b9",
+          "bbox": [
+            71.91,
+            440.6,
+            525.47,
+            764.56
+          ],
+          "type": "paragraph",
+          "text": "1.  Srivastava, A. and N. Geroliminis,  Empirical observations of capacity drop in freeway merges with ramp  control and integration in a first-order model.  Transportation Research Part C: Emerging Technologies,  2013.  30 : p. 161-177.  2.  Papageorgiou, M., et al.,  Review of road traffic control strategies.  Proceedings of the IEEE, 2003.  91 (12):  p. 2043-2067.  3.  Levinson, D. and L. Zhang,  Ramp meters on trial: Evidence from the Twin Cities metering holiday.   Transportation Research Part A: Policy and Practice, 2006.  40 (10): p. 810-828.  4.  Bhouri, N., H. Haj-Salem, and J. Kauppila,  Isolated versus coordinated ramp metering: Field evaluation  results of travel time reliability and traffic impact.  Transportation Research Part C: Emerging  Technologies, 2013.  28 : p. 155-167.  5.  Faulkner, L., et al.,  Evaluation of HERO-Coordinated Ramp Metering Installation at M1 and M3  Freeways in Queensland, Australia.  Transportation Research Record: Jounral of the Transportation  Research Board, 2014(2470): p. 13-23.  6.  Lu, X.Y., C.J. Wu, and X.Y. Lu.  Field Test Implementation of Coordinated Ramp Metering Control  Strategy: A Case Study on SR-99N . in  Transportation Research Board Meeting 96th Annual Meeting .  2018. Washington D.C., USA.  7.  Systematics, C.,  Twin cities ramp meter evaluation . 2001, Cambridge Systematics.  8.  Papageorgiou, M., H. Hadj-Salem, and J.-M. Blosseville,  ALINEA: A local feedback control law for on- ramp metering.  Transportation Research Record, 1991.  1320 (1): p. 58-67.  9.  Wang, Y., et al.,  Local ramp metering in the presence of a distant downstream bottleneck: Theoretical  analysis and simulation study.  IEEE Transactions on Intelligent Transportation Systems, 2014.  15 (5): p.  2024-2039.  10.  Wattleworth, J.A.,  Peak-period analysis and control of a freeway system . 1965, Texas Transportation  Institute.  11.  Masher, D.P., et al.,  Guidelines for design and operation of ramp control systems . 1975, Stanford  Research Institute: California, U.S.  12.  Papageorgiou, M., H. Hadj-Salem, and J.-M. Blosseville,  ALINEA: A local feedback control law for on- ramp metering.  Transportation Research Record: Jounral of the Transportation Research Board, 1991."
+        }
+      ]
+    },
+    {
+      "page_number": 15,
+      "width": 594.9600219726562,
+      "height": 842.0399780273438,
+      "blocks": [
+        {
+          "block_id": "p15_b0",
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "15"
+        },
+        {
+          "block_id": "p15_b1",
+          "bbox": [
+            71.84,
+            70.84,
+            525.44,
+            590.71
+          ],
+          "type": "paragraph",
+          "text": "1320 (1): p. 58-67.  13.  Smaragdis, E. and M. Papageorgiou,  Series of new local ramp metering strategies.  Transportation  Research Record: Journal of the Transportation Research Board, 2004.  1856 : p. 74-86.  14.  Papageorgiou, M., J.M. Blosseville, and H. Hajsalem,  Modeling and Real-Time Control of Traffic Flow  on the Southern Part of Boulevard-Peripherique in Paris .2. Coordinated on-Ramp Metering.   Transportation Research Part A: Policy and Practice, 1990.  24 (5): p. 361-370.  15.  Papamichail, I. and M. Papageorgiou,  Traffic-responsive linked ramp-metering control.  IEEE  Transactions on Intelligent Transportation Systems, 2008.  9 (1): p. 111-121.  16.  Papageorgiou, M. and R. Mayr,  Optimal Decomposition Methods Applied to Motorway Traffic Control.   International Journal of Control, 1982.  35 (2): p. 269-280.  17.  Bellemans, T., B. De Schutter, and B. De Moor,  Model predictive control for ramp metering of motorway  traffic: A case study.  Control Engineering Practice, 2006.  14 (7): p. 757-767.  18.  Papamichail, I., et al.,  Coordinated ramp metering for freeway networks - A model-predictive  hierarchical control approach.  Transportation Research Part C: Emerging Technologies, 2010.  18 (3): p.  311-331.  19.  Davarynejad, M., et al.,  Motorway ramp-metering control with queuing consideration using Q-learning ,  in  14th International IEEE Conference on Intelligent Transportation Systems (ITSC) . 2011, IEEE. p.  1652-1658.  20.  Rezaee, K., B. Abdulhai, and H. Abdelgawad,  Application of reinforcement learning with continuous  state space to ramp metering in real-world conditions , in  15th International IEEE Conference on  Intelligent Transportation Systems . 2012, IEEE. p. 1590-1595.  21.  Fares, A. and W. Gomaa,  Freeway ramp-metering control based on reinforcement learning , in  11th IEEE  International Conference on Control & Automation (ICCA) . 2014, IEEE. p. 1226-1231.  22.  Yang, H. and H. Rakha,  Reinforcement learning ramp metering control for weaving sections in a  connected vehicle environment , in  Transportation Research Board 96th Annual Meeting . 2017.  23.  Belletti, F., et al.,  Expert level control of ramp metering based on multi-task deep reinforcement learning.   IEEE Transactions on Intelligent Transportation Systems, 2018.  19 (4): p. 1198-1207.  24.  Deng, F., et al.  Advanced Self-Improving Ramp Metering Algorithm based on Multi-Agent Deep  Reinforcement Learning . in  2019 IEEE Intelligent Transportation Systems Conference (ITSC) . 2019.  IEEE.  25.  Gao, J., et al.,  Adaptive traffic signal control: Deep reinforcement learning algorithm with experience  replay and target network.  arXiv preprint arXiv:1705.02755, 2017.  26.  Wei, H., et al.  Intellilight: A reinforcement learning approach for intelligent traffic light control . in  Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data  Mining . 2018.  27.  Liang, X., et al.,  A deep reinforcement learning network for traffic light cycle control.  IEEE Transactions  on Vehicular Technology, 2019.  68 (2): p. 1243-1253.  28.  Sutton, R. and A. Barto,  Reinforcement Learning: An Introduction . 1998: MIT Press.  29.  Kingma, D.P. and J. Ba,  Adam: A method for stochastic optimization.  arXiv preprint arXiv:1412.6980,  2014.  30.  Mnih, V., et al.,  Human-level control through deep reinforcement learning.  Nature, 2015.  518 (7540): p.  529-533.  31.  Mnih, V., et al.,  Playing atari with deep reinforcement learning.  arXiv preprint arXiv:1312.5602, 2013.  32.  Krajzewicz, D., et al.,  Recent development and applications of SUMO-Simulation of Urban MObility.   International Journal On Advances in Systems and Measurements, 2012.  5 (3&4)."
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "section_id": "section_1",
+      "title": "A Deep Reinforcement Learning Approach for Ramp Metering",
+      "level": 1,
+      "page": 1,
+      "blocks": []
+    },
+    {
+      "section_id": "section_2",
+      "title": "Based on Traffic Video Data",
+      "level": 1,
+      "page": 1,
+      "blocks": [
+        {
+          "block_id": "p1_b3",
+          "page": 1,
+          "bbox": [
+            72.0,
+            139.48,
+            379.41,
+            156.08
+          ],
+          "type": "paragraph",
+          "text": "Bing Liu, 1  Yu Tang, 2  Yuxiong Ji, 1  Yu Shen, 1  and Yuchuan Du 1"
+        },
+        {
+          "block_id": "p1_b4",
+          "page": 1,
+          "bbox": [
+            72.0,
+            167.2,
+            494.52,
+            211.4
+          ],
+          "type": "paragraph",
+          "text": "1  Key Laboratory of Road and Traffic Engineering of the Ministry of Education, Tongji  University, Shanghai 201804, China.  2  Tandon School of Engineering, New York University, New York 11201, USA."
+        },
+        {
+          "block_id": "p1_b5",
+          "page": 1,
+          "bbox": [
+            72.0,
+            223.08,
+            417.84,
+            239.24
+          ],
+          "type": "paragraph",
+          "text": "Correspondence should be addressed to Yu Shen;  yshen@tongji.edu.cn"
+        }
+      ]
+    },
+    {
+      "section_id": "section_3",
+      "title": "Abstract",
+      "level": 1,
+      "page": 1,
+      "blocks": [
+        {
+          "block_id": "p1_b7",
+          "page": 1,
+          "bbox": [
+            72.0,
+            280.92,
+            525.96,
+            476.48
+          ],
+          "type": "paragraph",
+          "text": "Ramp metering that uses traffic signals to regulate vehicle flows from the on-ramps has been  widely implemented to improve vehicle mobility of the freeway. Previous studies generally  update signal timings in real-time based on predefined traffic measures collected by point  detectors, such as traffic volumes and occupancies. Comparing with point detectors, traffic  cameras\u2014which have been increasingly deployed on road networks\u2014could cover larger areas  and provide more detailed traffic information. In this work, we propose a deep reinforcement  learning (DRL) method to explore the potential of traffic video data in improving the efficiency  of ramp metering. The proposed method uses traffic video frames as inputs and learns the  optimal control strategies directly from the high-dimensional visual inputs. A real-world case  study demonstrates that, in comparison with a state-of-the-practice method, the proposed DRL  method results in 1) lower travel times in the mainline, 2) shorter vehicle queues at the on- ramp, and 3) higher traffic flows downstream of the merging area. The results suggest that the  proposed method is able to extract useful information from the video data for better ramp  metering controls."
+        },
+        {
+          "block_id": "p1_b8",
+          "page": 1,
+          "bbox": [
+            72.0,
+            488.16,
+            363.6,
+            504.32
+          ],
+          "type": "paragraph",
+          "text": "Keywords : Ramp metering, Deep  Q -learning, Traffic videos"
+        },
+        {
+          "block_id": "p2_b0",
+          "page": 2,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "2"
+        }
+      ]
+    },
+    {
+      "section_id": "section_4",
+      "title": "Introduction",
+      "level": 1,
+      "page": 2,
+      "blocks": [
+        {
+          "block_id": "p2_b2",
+          "page": 2,
+          "bbox": [
+            72.0,
+            100.8,
+            525.96,
+            213.56
+          ],
+          "type": "paragraph",
+          "text": "Ramp metering uses traffic signals to regulate vehicle flows from on-ramps to the mainline of  the freeway. It alleviates the negative impacts of \u201ccapacity drop\u201d resulting from massive  merging behaviors and reduces the total time spent in the traffic system [1, 2]. Several field  tests have demonstrated the effectiveness of ramp metering in terms of throughput, vehicle- miles-traveled, vehicle-hours-traveled, and travel time reliability [3-6]. For instance, a large- scale experiment conducted in Minneapolis-Saint Paul found that when the ramp meters were  turned off, freeway capacity decreased by 9%, travel time increased by 22%, and crashes  increased by 26% [7]."
+        },
+        {
+          "block_id": "p2_b3",
+          "page": 2,
+          "bbox": [
+            72.0,
+            211.2,
+            525.96,
+            310.16
+          ],
+          "type": "paragraph",
+          "text": "Most of the ramp metering methods are driven by traffic measures, such as volumes,  queue lengths, and occupancies, obtained from point detectors ( e.g. , inductive loop detectors)  [8, 9]. These measures are predefined and only reflect partial information regarding traffic  operations. Recently, traffic cameras have been increasingly deployed on road networks for  monitoring traffic operations and detecting illegal driving behaviors. Compared with point  detectors, traffic cameras cover larger areas and provide more detailed traffic information, such  as vehicle locations, vehicle speeds, and headways between vehicles."
+        },
+        {
+          "block_id": "p2_b4",
+          "page": 2,
+          "bbox": [
+            72.0,
+            307.8,
+            525.96,
+            406.76
+          ],
+          "type": "paragraph",
+          "text": "We propose a deep reinforcement learning (DRL) method to explore the potential of  traffic video data in improving the efficiency of ramp metering. The proposed method does not  rely on hand-crafted traffic measures. Instead, it uses traffic video frames as inputs and learns  the optimal control strategies directly from high-dimensional visual inputs by taking advantage  of the special neutral structures in deep learning, which are capable of automatically extracting  high-level features from raw data. The effectiveness of the proposed method is demonstrated  in comparison with a state-of-the-practice method in a real-world case study."
+        },
+        {
+          "block_id": "p2_b5",
+          "page": 2,
+          "bbox": [
+            72.0,
+            404.4,
+            525.96,
+            461.96
+          ],
+          "type": "paragraph",
+          "text": "This paper is organized as follows. A brief review of related literature is presented first,  and then the methodology is described, followed by the demonstration in a real-world case  study. The final section summarizes the paper and discusses possible directions for future  research."
+        }
+      ]
+    },
+    {
+      "section_id": "section_5",
+      "title": "Related Works",
+      "level": 1,
+      "page": 2,
+      "blocks": [
+        {
+          "block_id": "p2_b7",
+          "page": 2,
+          "bbox": [
+            72.0,
+            503.64,
+            525.96,
+            575.0
+          ],
+          "type": "paragraph",
+          "text": "The signal timing plans for ramp metering could be fixed or traffic responsive. Wattleworth  [10] firstly formulated a linear programming model to optimize a fixed signal timing plan for  ramp metering based on historical traffic volume data. Responsive approaches adapt to traffic  flow fluctuations by updating signal timings in response to real-time traffic measures. The  responsive approaches can be classified as rule-based, optimization-based, and RL-based."
+        },
+        {
+          "block_id": "p2_b8",
+          "page": 2,
+          "bbox": [
+            72.0,
+            572.64,
+            528.96,
+            754.4
+          ],
+          "type": "paragraph",
+          "text": "The rule-based approaches update signal timings in real-time according to specific rules.  Masher et al. [11] proposed a feedforward ramp metering algorithm, aiming at keeping the  downstream traffic flow below the capacity. Papageorgiou et al. [8] proposed a feedback ramp  metering algorithm, which is named as ALINEA, based on the occupancy obtained by  inductive loop detectors downstream of the merging area [12]. The ALINEA regulates the  inflows from the on-ramp in the scheme of closed-loop control so that the detected occupancy  would approach a predefined target value. The ALINEA was further extended by considering  more traffic measures, such as queue lengths at the on-ramp and traffic volumes in the mainline  [13]. Wang et al. [9] proposed the proportional-integral-based ALINEA (i.e. PI-ALINEA),  considering the cases where a bottleneck with a capacity lower than that of the merging area is  present further downstream of the mearing area. They demonstrated numerically that the PI- ALINEA performs better than the original ALINEA. The ALINEA has been incorporated in  several coordinated ramp metering algorithms, such as METALINE and HERO [14, 15]."
+        },
+        {
+          "block_id": "p3_b0",
+          "page": 3,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "3"
+        },
+        {
+          "block_id": "p3_b1",
+          "page": 3,
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            169.64
+          ],
+          "type": "paragraph",
+          "text": "The optimization-based approaches optimize signal timings based on real-time traffic  data. The model predictive control framework, which considers the interactions between ramp  metering and future traffic states, is often employed to predict traffic evolution for proactive  traffic controls. Nevertheless, the models used to describe traffic dynamics may lead to  nonlinear control problems, which brings the difficulty in finding the optimal signal timings  [16-18]. In addition, the effectiveness of the ramp metering strategy depends on the degree of  the fitness of the models to the actual traffic dynamics."
+        },
+        {
+          "block_id": "p3_b2",
+          "page": 3,
+          "bbox": [
+            72.0,
+            167.28,
+            525.96,
+            376.64
+          ],
+          "type": "paragraph",
+          "text": "The RL based approaches search for a policy that determines the signal timings based  on the current traffic state. Existing RL-based ramp metering approaches were mainly  developed based on value-based RL methods, such as the Q-learning algorithm. They evaluate  the value of policy given each state-action pair   and improve the policy with a heuristic search.  The actions usually refer to the metering rate or signal phase selection. The states are  represented by traffic measures, such as traffic density and volume. The downstream and  upstream traffic flow, ramp queue length, and traffic density are often selected to define the  control reward [19-22]. The RL has also been introduced for coordinated ramp metering [23,  24]. Note that existing RL methods for ramp metering were driven by traditional traffic  measures. To the best of our knowledge, no studies have attempted to automatically extract  information from traffic videos and learns the optimal control strategies directly from the visual  inputs for ramp metering. Some studies have considered traffic video data as inputs in the RL  framework for intersection signal controls [25-27]. Nevertheless, the elements in the RL  framework, such as the action, reward, and state, for ramp metering and intersection signal  controls are different."
+        }
+      ]
+    },
+    {
+      "section_id": "section_6",
+      "title": "Methodology",
+      "level": 1,
+      "page": 3,
+      "blocks": [
+        {
+          "block_id": "p3_b4",
+          "page": 3,
+          "bbox": [
+            72.0,
+            418.32,
+            525.96,
+            544.88
+          ],
+          "type": "paragraph",
+          "text": "We propose a DRL method for local ramp metering based on traffic video data. The proposed  method adopts a flexible two-phase control scheme, which is illustrated in Fig. 1. A policy  trained from the DRL determines whether the phase in the next time step is green or red at a  fixed time step  L  based on current traffic state. The adopted control scheme is conceivably  more flexible than the conventional \u201cstop-and-go\u201d scheme with fixed red and green phases  flashing alternately. To reduce the computation burden, traffic video frames are used as control  inputs. Vehicle locations from raw images are extracted to reconstruct visual representations  in the DRL method [25]."
+        },
+        {
+          "block_id": "p3_b5",
+          "page": 3,
+          "bbox": [
+            236.32,
+            587.27,
+            276.2,
+            602.29
+          ],
+          "type": "paragraph",
+          "text": "Stop Bar"
+        },
+        {
+          "block_id": "p3_b6",
+          "page": 3,
+          "bbox": [
+            304.56,
+            611.59,
+            398.97,
+            626.61
+          ],
+          "type": "paragraph",
+          "text": "Current phase: green"
+        },
+        {
+          "block_id": "p3_b7",
+          "page": 3,
+          "bbox": [
+            85.58,
+            664.28,
+            130.53,
+            679.31
+          ],
+          "type": "paragraph",
+          "text": "Time step"
+        },
+        {
+          "block_id": "p3_b8",
+          "page": 3,
+          "bbox": [
+            79.28,
+            644.84,
+            133.72,
+            659.87
+          ],
+          "type": "paragraph",
+          "text": "Signal State"
+        },
+        {
+          "block_id": "p3_b9",
+          "page": 3,
+          "bbox": [
+            72.0,
+            664.28,
+            506.88,
+            694.76
+          ],
+          "type": "paragraph",
+          "text": "t - L   t   t+L   t+ 2 L   t -2 L"
+        },
+        {
+          "block_id": "p3_b10",
+          "page": 3,
+          "bbox": [
+            185.28,
+            692.72,
+            412.17,
+            706.14
+          ],
+          "type": "figure_caption",
+          "text": "Figure 1: Two-phase control scheme for ramp metering."
+        },
+        {
+          "block_id": "p3_b11",
+          "page": 3,
+          "bbox": [
+            72.0,
+            707.88,
+            525.96,
+            765.44
+          ],
+          "type": "figure_caption",
+          "text": "Fig. 2 illustrates the ramp metering problem in the general scheme of RL. The ramp  meter acts as the agent to interact with the environment, namely the traffic system including  the mainline and the on-ramp. The ramp meter takes certain control action  a  based on current"
+        },
+        {
+          "block_id": "p4_b0",
+          "page": 4,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "4"
+        },
+        {
+          "block_id": "p4_b1",
+          "page": 4,
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            155.96
+          ],
+          "type": "paragraph",
+          "text": "traffic state  s . Then the traffic system responds to the control action with the state transition  from  s  to  s ' .  The ramp meter obtains reward  r  that quantifies the effect of the control action  a   given state  s . In the RL field, the interaction process is assumed to be a Markov Decision  Process [28]. That is, given current state  s  and action  a , the following state  s '  and reward  r  are  independent of previous states and actions."
+        },
+        {
+          "block_id": "p4_b2",
+          "page": 4,
+          "bbox": [
+            258.36,
+            158.03,
+            308.65,
+            171.51
+          ],
+          "type": "paragraph",
+          "text": "Ramp meter"
+        },
+        {
+          "block_id": "p4_b3",
+          "page": 4,
+          "bbox": [
+            267.54,
+            169.82,
+            299.3,
+            183.3
+          ],
+          "type": "paragraph",
+          "text": "(Agent)"
+        },
+        {
+          "block_id": "p4_b4",
+          "page": 4,
+          "bbox": [
+            253.42,
+            247.61,
+            313.52,
+            272.89
+          ],
+          "type": "paragraph",
+          "text": "Traffic system (Environment)"
+        },
+        {
+          "block_id": "p4_b5",
+          "page": 4,
+          "bbox": [
+            179.36,
+            207.89,
+            415.14,
+            223.03
+          ],
+          "type": "paragraph",
+          "text": "Control Action  a State  s Reward  r"
+        },
+        {
+          "block_id": "p4_b6",
+          "page": 4,
+          "bbox": [
+            393.69,
+            231.59,
+            481.24,
+            245.07
+          ],
+          "type": "paragraph",
+          "text": "Change environment"
+        },
+        {
+          "block_id": "p4_b7",
+          "page": 4,
+          "bbox": [
+            402.86,
+            222.74,
+            469.52,
+            278.59
+          ],
+          "type": "paragraph",
+          "text": "from state  s  to  s \u2019"
+        },
+        {
+          "block_id": "p4_b8",
+          "page": 4,
+          "bbox": [
+            188.04,
+            264.6,
+            493.8,
+            289.5
+          ],
+          "type": "figure_caption",
+          "text": "Figure 2: Ramp metering in the general scheme of RL."
+        },
+        {
+          "block_id": "p4_b9",
+          "page": 4,
+          "bbox": [
+            72.0,
+            280.36,
+            525.96,
+            349.04
+          ],
+          "type": "paragraph",
+          "text": "The RL method aims at training the agent (Ramp meter) to find an optimal policy  \ud835\udf0b\ud835\udf0b \u2217   that maximizes the discounted cumulative reward  G t  after time step  t . To achieve that goal, one  approach is to learn the optimal action-value function  Q*   ( s ,  a ), which is defined by:"
+        },
+        {
+          "block_id": "p4_b10",
+          "page": 4,
+          "bbox": [
+            72.0,
+            345.72,
+            525.96,
+            399.08
+          ],
+          "type": "paragraph",
+          "text": "( ) [ ] * , max | , t t t Q s   a G s s   a a \u03c0 \u03c0 = = = \uf045   (1)  where  \u03c0  is a policy mapping traffic states to control actions. Once  Q*   ( s ,  a ) is found, the action  to be taken can be obtained by:"
+        },
+        {
+          "block_id": "p4_b11",
+          "page": 4,
+          "bbox": [
+            72.0,
+            371.56,
+            525.96,
+            496.28
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udf0b\ud835\udf0b \u2217 (\ud835\udc60\ud835\udc60) = argmax \ud835\udc4e\ud835\udc4e \u2032 \ud835\udc44\ud835\udc44 \u2217 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e \u2032 )   (2)  The process of learning policy from the action-value function  Q  is termed  Q -learning.  The key step in  Q -learning is to estimate  Q*   ( s ,  a ). To better capture the traffic features in video  data, we adopt a deep neural network termed  Q -network to approximate  Q*   ( s ,  a ). The neural  network contains serval convolutional layers and fully-connected layers. The convolutional  layers extract traffic features from the video frames and the full-connected layers estimate the  Q value based on the output of convolutional layers."
+        },
+        {
+          "block_id": "p4_b12",
+          "page": 4,
+          "bbox": [
+            72.0,
+            507.77,
+            291.0,
+            524.38
+          ],
+          "type": "paragraph",
+          "text": "State, Action, and Reward Representation"
+        },
+        {
+          "block_id": "p4_b13",
+          "page": 4,
+          "bbox": [
+            72.0,
+            535.68,
+            525.96,
+            689.33
+          ],
+          "type": "paragraph",
+          "text": "1) Action  The ramp meter takes two possible actions at fixed time step  L  to determine whether  the phase in the next time step is green (G) or red (R), namely action set  \ud835\udc9c\ud835\udc9c= {\ud835\udc3a\ud835\udc3a, \ud835\udc45\ud835\udc45} .    2) State  Fig. 3 illustrates the process of obtaining visual representations from the raw images to  represent traffic states. Considering a control area of size  \ud835\udc4b\ud835\udc4b\u00d7 \ud835\udc4c\ud835\udc4c  as shown in Fig. 3a, the  position of each vehicle  i   (\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 )  is extracted from the raw images. Traffic state at times step  t   is represented by a position matrix  \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 \u2208\u211d \ud835\udc4b\ud835\udc4b\u00d7\ud835\udc4c\ud835\udc4c :"
+        },
+        {
+          "block_id": "p4_b14",
+          "page": 4,
+          "bbox": [
+            72.0,
+            635.92,
+            520.56,
+            705.2
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 ) = \ud835\udc48\ud835\udc48 \ud835\udc49\ud835\udc49 ,  \ud835\udc56\ud835\udc56\u2208\ud835\udc3c\ud835\udc3c \ud835\udc61\ud835\udc61   (3)  U V  is a constant and  I t   refers to the vehicles set."
+        },
+        {
+          "block_id": "p5_b0",
+          "page": 5,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "5"
+        },
+        {
+          "block_id": "p5_b1",
+          "page": 5,
+          "bbox": [
+            108.0,
+            319.56,
+            510.48,
+            376.16
+          ],
+          "type": "figure_caption",
+          "text": "Figure 3: State representation.    The position matrix additionally contains the information of the signal states:"
+        },
+        {
+          "block_id": "p5_b2",
+          "page": 5,
+          "bbox": [
+            201.24,
+            347.8,
+            350.64,
+            422.69
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 ) =  \u0d5c \ud835\udc48\ud835\udc48 \ud835\udc3a\ud835\udc3a  if \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61\u22121   = \ud835\udc3a\ud835\udc3a"
+        },
+        {
+          "block_id": "p5_b3",
+          "page": 5,
+          "bbox": [
+            277.2,
+            362.68,
+            520.56,
+            432.05
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc48\ud835\udc48 \ud835\udc45\ud835\udc45  if \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61\u22121   = \ud835\udc45\ud835\udc45   (4)"
+        },
+        {
+          "block_id": "p5_b4",
+          "page": 5,
+          "bbox": [
+            72.0,
+            376.12,
+            525.96,
+            443.57
+          ],
+          "type": "paragraph",
+          "text": "(\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 )  is the position of signal light in images and  \ud835\udc48\ud835\udc48 \ud835\udc3a\ud835\udc3a  and  \ud835\udc48\ud835\udc48 \ud835\udc45\ud835\udc45  are constants to represent  actions execute in time step  t -1."
+        },
+        {
+          "block_id": "p5_b5",
+          "page": 5,
+          "bbox": [
+            111.0,
+            404.44,
+            343.44,
+            471.41
+          ],
+          "type": "paragraph",
+          "text": "The other elements in matrix  \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61  are set to zero:"
+        },
+        {
+          "block_id": "p5_b6",
+          "page": 5,
+          "bbox": [
+            147.12,
+            418.0,
+            520.56,
+            485.45
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 (\ud835\udc65\ud835\udc65, \ud835\udc66\ud835\udc66) = 0 ,  (\ud835\udc65\ud835\udc65, \ud835\udc66\ud835\udc66) \u2209{(\ud835\udc65\ud835\udc65 \ud835\udc56\ud835\udc56 , \ud835\udc66\ud835\udc66 \ud835\udc56\ud835\udc56 )|\ud835\udc56\ud835\udc56\u2208\ud835\udc3c\ud835\udc3c \ud835\udc61\ud835\udc61 } \u222a{(\ud835\udc65\ud835\udc65 \ud835\udc45\ud835\udc45 , \ud835\udc66\ud835\udc66 \ud835\udc45\ud835\udc45 )}   (5)"
+        },
+        {
+          "block_id": "p5_b7",
+          "page": 5,
+          "bbox": [
+            72.0,
+            471.36,
+            524.76,
+            501.32
+          ],
+          "type": "paragraph",
+          "text": "Since one matrix is insufficient to describe vehicle dynamics, we stack the matrices of  consecutive  N  time steps to represent the state  s t :"
+        },
+        {
+          "block_id": "p5_b8",
+          "page": 5,
+          "bbox": [
+            215.52,
+            475.36,
+            520.56,
+            542.33
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61 =  \u0d5b \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61\u2212\ud835\udc3f\ud835\udc3f(\ud835\udc41\ud835\udc41\u22121) , \u22ef, \ud835\udc5a\ud835\udc5a \ud835\udc61\ud835\udc61 \u0d5f   (6)"
+        },
+        {
+          "block_id": "p5_b9",
+          "page": 5,
+          "bbox": [
+            72.0,
+            529.68,
+            525.96,
+            656.24
+          ],
+          "type": "paragraph",
+          "text": "For computation efficiency, down-sampling is introduced before the matrix stack to  reduce the input dimensions and maintain sufficient information about vehicle positions.    3) Reward  The reward is critical since it motivates the agent to approach the objective. Vehicle travel  times through the system are good measures of vehicle mobility. But they are not suitable  rewards since they are greatly influenced by previous actions and cannot well quantify the  value of the current action. Alternatively, the speed   in the merging area and the queue length  at the on-ramp are adopted to define the reward. The reward  r t  after action  a t  is defined by:"
+        },
+        {
+          "block_id": "p5_b10",
+          "page": 5,
+          "bbox": [
+            72.0,
+            629.68,
+            525.96,
+            728.48
+          ],
+          "type": "paragraph",
+          "text": "\ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 = \u2211 \u0d6b \ud835\udf07\ud835\udf07\ud835\udf07\ud835\udf07 \ud835\udc57\ud835\udc57 + \ud835\udf14\ud835\udf14\ud835\udc5e\ud835\udc5e \ud835\udc57\ud835\udc57 \u0d6f \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f \ud835\udc57\ud835\udc57=\ud835\udc61\ud835\udc61+1 \ud835\udc3f\ud835\udc3f \u2044   ,  \ud835\udf07\ud835\udf07> 0 ,  \ud835\udf14\ud835\udf14< 0   (7)  where  v j  and  q j  represent the speed in the merging area and the queue length at the on-ramp at  time step  j , respectively. Positive  \u03bc  and negative  \u03c9  denote the reward weights for the speed and  the queue length, respectively. The defined rewards balance the priority needs between  improving vehicle mobility in the mainline and reducing vehicle delays at the on-ramp."
+        },
+        {
+          "block_id": "p6_b0",
+          "page": 6,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "6"
+        },
+        {
+          "block_id": "p6_b1",
+          "page": 6,
+          "bbox": [
+            72.0,
+            70.49,
+            128.28,
+            87.1
+          ],
+          "type": "paragraph",
+          "text": "Algorithm"
+        },
+        {
+          "block_id": "p6_b2",
+          "page": 6,
+          "bbox": [
+            72.0,
+            98.52,
+            525.96,
+            128.48
+          ],
+          "type": "paragraph",
+          "text": "The training problem can be viewed as the regression problem with the loss function defined  by:"
+        },
+        {
+          "block_id": "p6_b3",
+          "page": 6,
+          "bbox": [
+            189.17,
+            127.97,
+            360.57,
+            150.29
+          ],
+          "type": "paragraph",
+          "text": "( ) ( ) ( ) ( )"
+        },
+        {
+          "block_id": "p6_b4",
+          "page": 6,
+          "bbox": [
+            360.84,
+            129.25,
+            364.33,
+            138.86
+          ],
+          "type": "paragraph",
+          "text": "2"
+        },
+        {
+          "block_id": "p6_b5",
+          "page": 6,
+          "bbox": [
+            181.06,
+            129.25,
+            520.56,
+            155.3
+          ],
+          "type": "paragraph",
+          "text": ", * , ,   , i s   a i L   w Q s   a Q   s   a   w \uf8ee \uf8f9 = \u2212 \uf8f0 \uf8fb \uf045   (8)"
+        },
+        {
+          "block_id": "p6_b6",
+          "page": 6,
+          "bbox": [
+            72.0,
+            154.92,
+            525.96,
+            198.68
+          ],
+          "type": "paragraph",
+          "text": "where  Q*   ( s ,  a ) is approximated by a deep neural network.  w i  denotes the weights in the deep  neural network after the  i th  update. The gradient-based algorithm ADAM [29] is used to update  w i  to minimize the loss function."
+        },
+        {
+          "block_id": "p6_b7",
+          "page": 6,
+          "bbox": [
+            72.0,
+            196.32,
+            527.28,
+            295.28
+          ],
+          "type": "paragraph",
+          "text": "Although   Q -network could handle large state space, it raises the problem of instability  in training [30]. Two approaches have been proposed to resolve the problem, illustrated in Fig.  4. The experience replay [31] stores the data prepared for training into the replay buffer and  samples these data uniformly for training the agent. It contributes to making the training data  independently and identically distributed. The target network [30] is introduced for a stable  estimation of target value  Q*  ( s ,  a ). When  Q- network is being trained, the target network is  freezing. Its parameters are updated by copying those in  Q -network with a certain frequency."
+        },
+        {
+          "block_id": "p6_b8",
+          "page": 6,
+          "bbox": [
+            72.0,
+            292.92,
+            525.96,
+            378.08
+          ],
+          "type": "paragraph",
+          "text": "A multi-task learning strategy is implemented in the training process to improve  learning efficiency. While training the ramp metering Q-network, the mean speed in the  merging area and the queue length at the on-ramp are predicted simultaneously. The fully- connected layer in the Q-network in multi-task learning is extended to two layers to calculate  the Q-value and predict the speed and queue length, respectively. The loss function is redefined  as follows."
+        },
+        {
+          "block_id": "p6_b9",
+          "page": 6,
+          "bbox": [
+            176.64,
+            354.16,
+            369.83,
+            421.61
+          ],
+          "type": "paragraph",
+          "text": "\u2112 1 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \ud835\udd3c\ud835\udd3c \ud835\udc60\ud835\udc60,\ud835\udc4e\ud835\udc4e \u0d6b\ud835\udc44\ud835\udc44 \u2217 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e) \u2212\ud835\udc44\ud835\udc44 0 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u0d6f"
+        },
+        {
+          "block_id": "p6_b10",
+          "page": 6,
+          "bbox": [
+            72.0,
+            357.44,
+            525.96,
+            481.76
+          ],
+          "type": "paragraph",
+          "text": "2   (8)  \u2112 2 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \ud835\udd3c\ud835\udd3c \ud835\udc60\ud835\udc60,\ud835\udc4e\ud835\udc4e ((\ud835\udc44\ud835\udc44 1 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u2212\ud835\udc63\ud835\udc63) 2   + (\ud835\udc44\ud835\udc44 2 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) \u2212\ud835\udc62\ud835\udc62) 2 )   (9)  \u2112(\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) = \u2112 1 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) + \ud835\udf06\ud835\udf06\u2112 2 (\ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 )   (10)  where  \ud835\udc44\ud835\udc44 0 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ) ,  \ud835\udc44\ud835\udc44 1 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 ), \ud835\udc44\ud835\udc44 2 (\ud835\udc60\ud835\udc60, \ud835\udc4e\ud835\udc4e, \ud835\udc64\ud835\udc64 \ud835\udc56\ud835\udc56 )  represent the prediction values of the action- value function, mean speed, and queue length, respectively.  u  and  v  refer to the ground truth of  the speed and queue length, respectively."
+        },
+        {
+          "block_id": "p6_b11",
+          "page": 6,
+          "bbox": [
+            378.82,
+            481.02,
+            388.31,
+            496.63
+          ],
+          "type": "paragraph",
+          "text": "b)"
+        },
+        {
+          "block_id": "p6_b12",
+          "page": 6,
+          "bbox": [
+            318.67,
+            551.82,
+            501.38,
+            572.26
+          ],
+          "type": "paragraph",
+          "text": "Q- network Target  network trained freezing"
+        },
+        {
+          "block_id": "p6_b13",
+          "page": 6,
+          "bbox": [
+            379.41,
+            598.53,
+            453.35,
+            618.96
+          ],
+          "type": "paragraph",
+          "text": "update target network with certain frequency"
+        },
+        {
+          "block_id": "p6_b14",
+          "page": 6,
+          "bbox": [
+            146.89,
+            565.64,
+            167.07,
+            576.31
+          ],
+          "type": "paragraph",
+          "text": "Agent"
+        },
+        {
+          "block_id": "p6_b15",
+          "page": 6,
+          "bbox": [
+            135.44,
+            621.29,
+            178.51,
+            631.96
+          ],
+          "type": "paragraph",
+          "text": "Environment"
+        },
+        {
+          "block_id": "p6_b16",
+          "page": 6,
+          "bbox": [
+            102.83,
+            593.98,
+            214.45,
+            604.69
+          ],
+          "type": "paragraph",
+          "text": "Action  a State  s Reward  r"
+        },
+        {
+          "block_id": "p6_b17",
+          "page": 6,
+          "bbox": [
+            184.11,
+            613.82,
+            223.92,
+            658.06
+          ],
+          "type": "paragraph",
+          "text": "New state  s \u2019"
+        },
+        {
+          "block_id": "p6_b18",
+          "page": 6,
+          "bbox": [
+            142.77,
+            506.9,
+            224.16,
+            519.61
+          ],
+          "type": "paragraph",
+          "text": "Sample Training"
+        },
+        {
+          "block_id": "p6_b19",
+          "page": 6,
+          "bbox": [
+            150.1,
+            518.69,
+            163.58,
+            529.37
+          ],
+          "type": "paragraph",
+          "text": "data"
+        },
+        {
+          "block_id": "p6_b20",
+          "page": 6,
+          "bbox": [
+            236.33,
+            589.51,
+            292.94,
+            633.75
+          ],
+          "type": "paragraph",
+          "text": "Store < s ,  a ,  r ,  s \u2019 >"
+        },
+        {
+          "block_id": "p6_b21",
+          "page": 6,
+          "bbox": [
+            126.82,
+            533.19,
+            153.88,
+            553.62
+          ],
+          "type": "paragraph",
+          "text": "Update  weights"
+        },
+        {
+          "block_id": "p6_b22",
+          "page": 6,
+          "bbox": [
+            191.87,
+            479.87,
+            200.73,
+            495.48
+          ],
+          "type": "paragraph",
+          "text": "a)"
+        },
+        {
+          "block_id": "p6_b23",
+          "page": 6,
+          "bbox": [
+            243.53,
+            505.37,
+            295.01,
+            538.01
+          ],
+          "type": "paragraph",
+          "text": "< s t ,  a t ,  r t ,  s t +1 > < s t +1 ,  a t +1 ,  r t +1 ,  s t +2 > < s t +2 ,  a t +2 ,  r t +2 ,  s t +3 > < s t +3 ,  a t +3 ,  r t +3 ,  s t +4 >"
+        },
+        {
+          "block_id": "p6_b24",
+          "page": 6,
+          "bbox": [
+            265.91,
+            536.6,
+            274.42,
+            545.63
+          ],
+          "type": "paragraph",
+          "text": "\u2026"
+        },
+        {
+          "block_id": "p6_b25",
+          "page": 6,
+          "bbox": [
+            247.49,
+            491.97,
+            292.86,
+            502.65
+          ],
+          "type": "paragraph",
+          "text": "Replay buffer"
+        },
+        {
+          "block_id": "p6_b26",
+          "page": 6,
+          "bbox": [
+            319.01,
+            504.3,
+            483.1,
+            522.74
+          ],
+          "type": "paragraph",
+          "text": "( ) ( )"
+        },
+        {
+          "block_id": "p6_b27",
+          "page": 6,
+          "bbox": [
+            483.23,
+            506.35,
+            485.41,
+            512.06
+          ],
+          "type": "paragraph",
+          "text": "2"
+        },
+        {
+          "block_id": "p6_b28",
+          "page": 6,
+          "bbox": [
+            314.01,
+            506.33,
+            489.51,
+            525.74
+          ],
+          "type": "paragraph",
+          "text": ",   ~ ;   , ~ E max (   , , ) (   ,   , ) i s   a r   s i a L   w r Q   s   a   w Q   s   a   w \u03c1 \u03b6 \u03b3 \u2212 \u2032 \u2032 \uf8ee \uf8f9 \u2032 \u2032 = + \u2212 \uf8ef \uf8fa \uf8f0 \uf8fb"
+        },
+        {
+          "block_id": "p6_b29",
+          "page": 6,
+          "bbox": [
+            72.0,
+            634.08,
+            524.83,
+            676.88
+          ],
+          "type": "figure_caption",
+          "text": "Figure 4: 4 Approaches for stabilizing the training process in deep  Q -learning: a) relay buffer; b) target network."
+        },
+        {
+          "block_id": "p6_b30",
+          "page": 6,
+          "bbox": [
+            72.0,
+            674.52,
+            525.96,
+            732.08
+          ],
+          "type": "paragraph",
+          "text": "The algorithm for training the ramp metering policy is presented in Table 1. The ramp  meter takes new action with the  \u03b5 -greedy strategy, meaning that the agent does not always  adopt the best action  derived  from current  Q  ( s ,  a ,  w ). Doing so is helpful to explore unknown  policies that may be better."
+        },
+        {
+          "block_id": "p7_b0",
+          "page": 7,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "7"
+        },
+        {
+          "block_id": "p7_b1",
+          "page": 7,
+          "bbox": [
+            207.36,
+            70.84,
+            392.49,
+            84.63
+          ],
+          "type": "table_caption",
+          "text": "Table 1: Deep Q-learning for ramp metering."
+        },
+        {
+          "block_id": "p7_b2",
+          "page": 7,
+          "bbox": [
+            77.64,
+            86.5,
+            421.92,
+            101.78
+          ],
+          "type": "paragraph",
+          "text": "Input:  Batch size  k , Learning rate  \u03b7 , Decision step size  L , Exploration rate  \u03b5 ,"
+        },
+        {
+          "block_id": "p7_b3",
+          "page": 7,
+          "bbox": [
+            77.63,
+            99.4,
+            348.6,
+            214.4
+          ],
+          "type": "paragraph",
+          "text": "Freezing interval  F , Number of training episode  N ,   Number of training time steps  T  in one episode   Fill the replay buffer   randomly  Initialize the action-value function  Q  with random weights  w   Initialize the target network  Q \u2013   with weights  w \u2013  =  w  \ud835\udc53\ud835\udc53\u21900   for  episode =  {1, \u22ef, \ud835\udc41\ud835\udc41}"
+        },
+        {
+          "block_id": "p7_b4",
+          "page": 7,
+          "bbox": [
+            77.63,
+            165.27,
+            403.32,
+            382.42
+          ],
+          "type": "paragraph",
+          "text": "for   t  =  {1, \u22ef, \ud835\udc47\ud835\udc47}       if  mod ( t ,  L ) == 0             Observe state  s t   and choose action  a t   by \u03b5-greedy strategy          Execute action  a t , obtain reward  \ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 , state   \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f           Store transition < \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61 ,  \ud835\udc4e\ud835\udc4e \ud835\udc61\ud835\udc61 ,  \ud835\udc5f\ud835\udc5f \ud835\udc61\ud835\udc61 ,  \ud835\udc63\ud835\udc63 \ud835\udc61\ud835\udc61   ,  \ud835\udc62\ud835\udc62 \ud835\udc61\ud835\udc61 ,  \ud835\udc60\ud835\udc60 \ud835\udc61\ud835\udc61+\ud835\udc3f\ud835\udc3f > into replay buffer          Uniformly sample  k  transitions from replay buffer          Compute the gradient  \u2207 \ud835\udc64\ud835\udc64 (\u2112 1  + \ud835\udf06\ud835\udf06\u2112 2 )           Update weights  w  in  Q -network by ADAM with learning rate  \u03b7           \ud835\udc53\ud835\udc53\u2190\ud835\udc53\ud835\udc53+ 1            end if           if  mod ( f ,  F ) == 0               Update target network  Q \u2013  :  w \u2013 \u2190   w             end if        end for  end for"
+        }
+      ]
+    },
+    {
+      "section_id": "section_7",
+      "title": "Case study",
+      "level": 1,
+      "page": 7,
+      "blocks": [
+        {
+          "block_id": "p7_b6",
+          "page": 7,
+          "bbox": [
+            72.0,
+            424.01,
+            134.04,
+            440.62
+          ],
+          "type": "paragraph",
+          "text": "Case set-up"
+        },
+        {
+          "block_id": "p7_b7",
+          "page": 7,
+          "bbox": [
+            72.0,
+            451.92,
+            525.96,
+            523.28
+          ],
+          "type": "paragraph",
+          "text": "The proposed method is evaluated in SUMO, an open-source microscopic traffic  simulator [32]. The simulation is performed in the freeway connecting Qingdao and Huangdao  through a tunnel in Shandong, China, as shown in Fig. 5. The one-lane on-ramp and the  upstream three-lane mainline merge. And the freeway gradually reduces to three lanes in the  downstream segments."
+        },
+        {
+          "block_id": "p8_b0",
+          "page": 8,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "8"
+        },
+        {
+          "block_id": "p8_b1",
+          "page": 8,
+          "bbox": [
+            191.16,
+            417.48,
+            490.2,
+            442.38
+          ],
+          "type": "figure_caption",
+          "text": "Figure 5: Road network considered in the case study."
+        },
+        {
+          "block_id": "p8_b2",
+          "page": 8,
+          "bbox": [
+            72.0,
+            443.93,
+            525.96,
+            543.08
+          ],
+          "type": "paragraph",
+          "text": "The simulation considers the road network covering the on-ramp, the upstream and  downstream mainlines, and the merging area. The speed limits in the mainline and at the on- ramp are 80 and 40 km/h, respectively. The simulation parameters regarding driving behaviors  are calibrated based on empirical data. The simulation time is 7:50 a.m. to 9:00 a.m. Figure 6  presents the 10-min traffic volumes from 7:50 a.m. to 9:00 a.m. in the mainline and at the on- ramp."
+        },
+        {
+          "block_id": "p8_b4",
+          "page": 8,
+          "bbox": [
+            72.0,
+            714.36,
+            470.76,
+            757.42
+          ],
+          "type": "figure_caption",
+          "text": "Figure 6: Traffic volumes in the mainline and the on-ramp."
+        },
+        {
+          "block_id": "p8_b6",
+          "page": 8,
+          "bbox": [
+            85.6,
+            283.36,
+            135.2,
+            298.76
+          ],
+          "type": "paragraph",
+          "text": "Three-lane"
+        },
+        {
+          "block_id": "p8_b7",
+          "page": 8,
+          "bbox": [
+            91.79,
+            297.11,
+            131.75,
+            312.51
+          ],
+          "type": "paragraph",
+          "text": "mainline"
+        },
+        {
+          "block_id": "p8_b8",
+          "page": 8,
+          "bbox": [
+            391.66,
+            332.87,
+            444.13,
+            348.27
+          ],
+          "type": "paragraph",
+          "text": "Three-lane"
+        },
+        {
+          "block_id": "p8_b9",
+          "page": 8,
+          "bbox": [
+            396.48,
+            346.62,
+            436.44,
+            362.02
+          ],
+          "type": "paragraph",
+          "text": "mainline"
+        },
+        {
+          "block_id": "p8_b10",
+          "page": 8,
+          "bbox": [
+            162.42,
+            287.25,
+            204.64,
+            302.65
+          ],
+          "type": "paragraph",
+          "text": "Merging"
+        },
+        {
+          "block_id": "p8_b11",
+          "page": 8,
+          "bbox": [
+            172.58,
+            301.0,
+            191.62,
+            316.4
+          ],
+          "type": "paragraph",
+          "text": "area"
+        },
+        {
+          "block_id": "p8_b12",
+          "page": 8,
+          "bbox": [
+            335.17,
+            278.55,
+            380.06,
+            293.95
+          ],
+          "type": "paragraph",
+          "text": "One-lane"
+        },
+        {
+          "block_id": "p8_b13",
+          "page": 8,
+          "bbox": [
+            336.81,
+            292.3,
+            375.43,
+            307.7
+          ],
+          "type": "paragraph",
+          "text": "on-ramp"
+        },
+        {
+          "block_id": "p8_b14",
+          "page": 8,
+          "bbox": [
+            142.14,
+            371.43,
+            189.93,
+            400.51
+          ],
+          "type": "paragraph",
+          "text": "Curbside Centerline"
+        },
+        {
+          "block_id": "p8_b15",
+          "page": 8,
+          "bbox": [
+            189.54,
+            230.9,
+            379.97,
+            246.29
+          ],
+          "type": "paragraph",
+          "text": "Road network modelled in the simulation"
+        },
+        {
+          "block_id": "p9_b0",
+          "page": 9,
+          "bbox": [
+            72.0,
+            790.92,
+            300.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "9"
+        },
+        {
+          "block_id": "p9_b1",
+          "page": 9,
+          "bbox": [
+            72.0,
+            59.8,
+            525.96,
+            142.28
+          ],
+          "type": "paragraph",
+          "text": "The agent\u2019s observation in DRL covers the simulated road network. After zooming and  down-sampling, the size of one observation is 4 \u00d7 512 in pixels. One observation is stacked with  those in the previous two steps to represent the traffic state. The  Q -network in [31] is revised  as Fig. 7 to accommodate the input size for ramp metering. The other parameters in the deep  Q -learning for ramp metering are listed in Table 2."
+        },
+        {
+          "block_id": "p9_b3",
+          "page": 9,
+          "bbox": [
+            203.52,
+            223.56,
+            508.44,
+            248.46
+          ],
+          "type": "figure_caption",
+          "text": "Figure 7: Structure of the deep neural network."
+        },
+        {
+          "block_id": "p9_b5",
+          "page": 9,
+          "bbox": [
+            167.28,
+            262.04,
+            430.17,
+            275.46
+          ],
+          "type": "table_caption",
+          "text": "Table 2:  Key parameters in Deep  Q -learning for Ramp Metering"
+        },
+        {
+          "block_id": "p9_b6",
+          "page": 9,
+          "bbox": [
+            72.0,
+            278.76,
+            525.96,
+            531.44
+          ],
+          "type": "paragraph",
+          "text": "Parameters  Value  Replay buffer size  B  2\u00d710 5   Learning rate  \u03b7   2.5\u00d710 -4   Batch size  k   32  Exploration rate  \u03b5   0.1  Freeze interval  F   10 4   Decision step size  L   4 s  Reward weight  \u03bc   0.5  Reward weight  \u03c9   -0.1    The  Q -network in the proposed method is trained in 10 6  training frames. For comparison  purposes, two scenarios are also considered in the evaluation. The first scenario does not apply  ramp metering and the second scenario adopts the PI-ALINEA method. The PI-ALINEA  method fixes the length of the green phase and determines the length of the red phase in the  current signal cycle based on the length of the red phase in the previous cycle and the  downstream occupancies in the previous and current cycles. The parameters are fine-tuned to  minimize mean travel times in the traffic system. Each scenario is evaluated in 20 simulation  experiments, each of which is initialized with different random seeds."
+        },
+        {
+          "block_id": "p9_b7",
+          "page": 9,
+          "bbox": [
+            72.0,
+            542.93,
+            219.72,
+            559.54
+          ],
+          "type": "paragraph",
+          "text": "Evaluation and Comparison"
+        },
+        {
+          "block_id": "p9_b8",
+          "page": 9,
+          "bbox": [
+            72.0,
+            570.96,
+            525.96,
+            738.92
+          ],
+          "type": "figure_caption",
+          "text": "Fig. 8 presents the Q1 (25%), Q2 (50%), and Q3 (75%) of the travel times in the  mainline for three scenarios. The results demonstrate that ramp metering not only reduces  vehicle travel times but also improves the stability of traffic flows in the mainline. The resulting  travel times are close when the demand is low at the beginning (8:00-8:10). With the increase  of the demand, the median travel time increases faster in the no-control scenario and reaches  the maximum value of 4.25 min at 8:28. The maximum values of the median travel times  resulting from the PI-ALINEA method and the DRL method are 3.75 min and 3.4 min,  respectively, which are 11.7% and 20% lower than that in the no-control scenario. As the  demand decreases, the travel times of the three scenarios decrease to similar levels. In addition,  all the ramp metering methods narrow the interquartile ranges (Q3-Q1) of the travel times.  Overall, the proposed DRL method results in shorter travel times with narrower travel time  ranges than that of the fine-tuned PI-ALINEA method."
+        },
+        {
+          "block_id": "p10_b0",
+          "page": 10,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "10"
+        },
+        {
+          "block_id": "p10_b1",
+          "page": 10,
+          "bbox": [
+            72.0,
+            197.88,
+            525.96,
+            337.28
+          ],
+          "type": "figure_caption",
+          "text": "Figure 8: Vehicle travel times in the mainline.    Table 3 presents mean vehicle travel times in 20 simulation experiments. It is found that  the performance of the PI-ALINEA method is not always better than the no-control scenario.  For example, compared with the no-control scenario, the PI-ALINEA method increases vehicle  travel time by 10% in the 6 th  experiment. In contrast, the proposed DRL method consistently  results in shorter travel time than that of the no-control scenario, demonstrating the stable  performance of the proposed method. On average, the DRL method reduces vehicle travel time  by 13% when compared with the no-control scenario."
+        },
+        {
+          "block_id": "p10_b3",
+          "page": 10,
+          "bbox": [
+            176.4,
+            349.04,
+            421.05,
+            362.46
+          ],
+          "type": "table_caption",
+          "text": "Table 3:  Mean travel times in 20 simulation experiments (s)"
+        },
+        {
+          "block_id": "p10_b4",
+          "page": 10,
+          "bbox": [
+            77.4,
+            365.76,
+            503.88,
+            395.72
+          ],
+          "type": "paragraph",
+          "text": "No.  No  controls  PI-ALINEA  DRL  No.  No  controls  PI-ALINEA  DRL"
+        },
+        {
+          "block_id": "p10_b5",
+          "page": 10,
+          "bbox": [
+            72.0,
+            393.84,
+            525.96,
+            646.16
+          ],
+          "type": "paragraph",
+          "text": "1  186  179 [-4%]  171 [-8%]  11  188  173[-8%]  167[-11%]  2  203  173[-15%]  171[-16%]  12  211  182[-14%]  170[-19%]  3  217  175[-19%]  177[-18%]  13  219  175[-20%]  172[-21%]  4  227  181[-20%]  181[-20%]  14  170  172[+1%]   170[-0%]  5  202  173[-14%]  177[-12%]  15  187  182[-3%]  175[-6%]  6  178  195 [+10%]   173[-3%]  16  216  170[-21%]  179[-17%]  7  185  178[-4%]  174[-6%]  17  177  192[+8%]   174[-2%]  8  226  180[-20%]  173[-23%]  18  228  169[-26%]  172[-25%]  9  175  214 [+22%]   169[-3%]  19  190  179[-6%]  175[-8%]  10  206  183[-11%]  175[-15%]  20  194  180[-7%]  170[-12%]    Fig.9 presents the temporal-spatial distribution of the mean speeds along the mainline.  The results further demonstrate the efficiency of the ramp metering and the better performance  of the proposed method. In the no-control scenario, the minimum speed in the mainline is 12  m/s (43.2/h). The minimum speeds resulting from the PI-ALINEA method and the DRL  method are 13.3% and 20% higher than that in the no-control scenario, respectively. The area  with speed lower than 15 m/s (54km/h) is reduced with the PI-ALINEA method, which is  further reduced when the DRL method is implemented."
+        },
+        {
+          "block_id": "p11_b0",
+          "page": 11,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "11"
+        },
+        {
+          "block_id": "p11_b1",
+          "page": 11,
+          "bbox": [
+            72.0,
+            475.08,
+            525.96,
+            614.48
+          ],
+          "type": "figure_caption",
+          "text": "Figure 9: Temporal-spatial distribution of speed in a) No-control, b) PI-ALINEA c) DRL.    Fig. 10 presents the Q1, Q2, and Q3 of the queue lengths at the on-ramp in three  scenarios. The results reveal that ramp metering improves vehicle mobility in the mainline at  the cost of delays of vehicles at the on-ramp. Without ramp metering, no vehicle queues are  formed at the on-ramp. Both ramp metering methods result in vehicle queues at the on-ramp.  Nevertheless, the queues produced by the proposed method are shorter than those produced by  the PI-ALINEA method. When the PI-ALINEA method and the proposed DRL method are  adopted, the maximum values of the Q3 of the queue lengths are 126 m and 67 m, respectively."
+        },
+        {
+          "block_id": "p11_b3",
+          "page": 11,
+          "bbox": [
+            215.4,
+            745.8,
+            508.2,
+            770.7
+          ],
+          "type": "figure_caption",
+          "text": "Figure 10: Queue Length at the on-ramp."
+        },
+        {
+          "block_id": "p12_b0",
+          "page": 12,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "12"
+        },
+        {
+          "block_id": "p12_b1",
+          "page": 12,
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            224.84
+          ],
+          "type": "figure_caption",
+          "text": "Fig.11 presents the queue lengths at the on-ramp and the occupancy downstream of the  merging area for the two ramp metering methods. Fig.11a demonstrates that the queue length  and the occupancy are highly correlated when the PI-ALINEA method is adopted. The results  are understandable. Given high occupancy, the PI-ALINEA method tends to adopt a long red  phase, which would lead to long queues at the on-ramp. In contrast, Fig.11b shows that the  correlation between the queue length and the occupancy is relatively low when the DRL  method is implemented. The queue length over time is relatively stable, ranging from 25-50 m.  Although the occupancy is low after 8:45, the ramp meter is still active. The results indicate  that the proposed DRL method not only relies on downstream occupancy but other information  extracted from raw data."
+        },
+        {
+          "block_id": "p12_b4",
+          "page": 12,
+          "bbox": [
+            72.0,
+            501.96,
+            508.2,
+            544.88
+          ],
+          "type": "figure_caption",
+          "text": "Figure 11: Queue length and occupancy for a) PI-ALINEA and b) DRL."
+        },
+        {
+          "block_id": "p12_b5",
+          "page": 12,
+          "bbox": [
+            72.0,
+            542.52,
+            525.96,
+            613.76
+          ],
+          "type": "figure_caption",
+          "text": "Fig.12 presents the mean queue lengths at the on-ramp and the red ratios ( i.e. , the  proportion of the red phase in the simulation time) in each simulation for the two ramp metering  methods. The queue length generally increases with the red ratio. However, compared with the  PI-ALINEA method, the queues produced by the DRL method are shorter, suggesting that the  proposed method could better utilize the green time."
+        },
+        {
+          "block_id": "p13_b0",
+          "page": 13,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "13"
+        },
+        {
+          "block_id": "p13_b1",
+          "page": 13,
+          "bbox": [
+            72.0,
+            248.33,
+            525.96,
+            415.52
+          ],
+          "type": "figure_caption",
+          "text": "Figure 12: Relationship of queue length and red ratio for a) PI-ALINEA and b) DRL.    The better performance of the proposed DRL method is further revealed when  considering traffic flows downstream of the merge area, which is demonstrated in Fig. 13. At  the beginning traffic flows in three scenarios are close. During the peak period between 8:10- 8:35, the flows resulting from the DRL method are higher and more stable, suggesting that the  proposed DRL method could better alleviate the negative impacts of \u201ccapacity drop\u201d resulting  from massive merging behaviors. When traffic demand decreases during 8:40-9:00, traffic  flows in the two ramp metering scenarios also decline. Nevertheless, traffic flows in the no- control scenario are still high during 8:45-8:55 since more vehicles are held in the system in  the previous periods."
+        },
+        {
+          "block_id": "p13_b3",
+          "page": 13,
+          "bbox": [
+            196.2,
+            571.73,
+            508.2,
+            596.94
+          ],
+          "type": "figure_caption",
+          "text": "Figure 13: Downstream volume in three scenarios."
+        }
+      ]
+    },
+    {
+      "section_id": "section_8",
+      "title": "Conclusion and Future Research",
+      "level": 1,
+      "page": 13,
+      "blocks": [
+        {
+          "block_id": "p13_b5",
+          "page": 13,
+          "bbox": [
+            72.0,
+            638.76,
+            525.96,
+            765.32
+          ],
+          "type": "paragraph",
+          "text": "This study proposes a DRL method for local ramp metering based on traffic video data. The  proposed method learns optimal strategies directly from high-dimensional visual inputs,  overcoming the reliance on hand-crafted traffic measures. The better performance of the  proposed method is demonstrated in a real-world case study. Compared with the traditional PI- ALINEA method, the proposed method results in lower travel times in the mainline, shorter  vehicle queue lengths at the on-ramp, and could better alleviate the negative impacts of  \u201ccapacity drop\u201d resulting from massive merging behaviors. The results suggest that the  proposed DRL method is able to extract useful information from the video data for better ramp  metering controls."
+        },
+        {
+          "block_id": "p14_b0",
+          "page": 14,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "14"
+        },
+        {
+          "block_id": "p14_b1",
+          "page": 14,
+          "bbox": [
+            72.0,
+            70.68,
+            525.96,
+            183.44
+          ],
+          "type": "paragraph",
+          "text": "Although promising, additional research would be required before the proposed method  can be implemented for operational use. We assume that vehicle location information from the  videos is accurate. Actually, the data quality may be disturbed by factors such as weather,  vehicle sizes, and colors. It is valuable to design a ramp metering algorithm that is robust to  those disturbances. In addition, abnormal events, such as accidents, are not considered in this  study. Efficiently training the ramp metering to adapt to abnormal events remains to be  investigated. Finally, extending the proposed method for coordinated ramp metering controls  is worth pursuing."
+        }
+      ]
+    },
+    {
+      "section_id": "section_9",
+      "title": "Data Availability",
+      "level": 1,
+      "page": 14,
+      "blocks": [
+        {
+          "block_id": "p14_b3",
+          "page": 14,
+          "bbox": [
+            72.0,
+            225.12,
+            513.84,
+            255.08
+          ],
+          "type": "paragraph",
+          "text": "The data used to support the results of this study is available from the corresponding author  upon request."
+        }
+      ]
+    },
+    {
+      "section_id": "section_10",
+      "title": "Conflicts of Interest",
+      "level": 1,
+      "page": 14,
+      "blocks": [
+        {
+          "block_id": "p14_b5",
+          "page": 14,
+          "bbox": [
+            72.0,
+            296.88,
+            521.16,
+            326.84
+          ],
+          "type": "paragraph",
+          "text": "The authors declare that there is no conflict of interest regarding the publication of this paper  exists."
+        }
+      ]
+    },
+    {
+      "section_id": "section_11",
+      "title": "Funding Statement",
+      "level": 1,
+      "page": 14,
+      "blocks": [
+        {
+          "block_id": "p14_b7",
+          "page": 14,
+          "bbox": [
+            72.0,
+            368.52,
+            503.4,
+            398.48
+          ],
+          "type": "paragraph",
+          "text": "This work is supported by the National Natural Science Foundation of China (Grant Nos.  71671124, 71901164)."
+        }
+      ]
+    },
+    {
+      "section_id": "section_12",
+      "title": "References",
+      "level": 1,
+      "page": 14,
+      "blocks": [
+        {
+          "block_id": "p14_b9",
+          "page": 14,
+          "bbox": [
+            71.91,
+            440.6,
+            525.47,
+            764.56
+          ],
+          "type": "paragraph",
+          "text": "1.  Srivastava, A. and N. Geroliminis,  Empirical observations of capacity drop in freeway merges with ramp  control and integration in a first-order model.  Transportation Research Part C: Emerging Technologies,  2013.  30 : p. 161-177.  2.  Papageorgiou, M., et al.,  Review of road traffic control strategies.  Proceedings of the IEEE, 2003.  91 (12):  p. 2043-2067.  3.  Levinson, D. and L. Zhang,  Ramp meters on trial: Evidence from the Twin Cities metering holiday.   Transportation Research Part A: Policy and Practice, 2006.  40 (10): p. 810-828.  4.  Bhouri, N., H. Haj-Salem, and J. Kauppila,  Isolated versus coordinated ramp metering: Field evaluation  results of travel time reliability and traffic impact.  Transportation Research Part C: Emerging  Technologies, 2013.  28 : p. 155-167.  5.  Faulkner, L., et al.,  Evaluation of HERO-Coordinated Ramp Metering Installation at M1 and M3  Freeways in Queensland, Australia.  Transportation Research Record: Jounral of the Transportation  Research Board, 2014(2470): p. 13-23.  6.  Lu, X.Y., C.J. Wu, and X.Y. Lu.  Field Test Implementation of Coordinated Ramp Metering Control  Strategy: A Case Study on SR-99N . in  Transportation Research Board Meeting 96th Annual Meeting .  2018. Washington D.C., USA.  7.  Systematics, C.,  Twin cities ramp meter evaluation . 2001, Cambridge Systematics.  8.  Papageorgiou, M., H. Hadj-Salem, and J.-M. Blosseville,  ALINEA: A local feedback control law for on- ramp metering.  Transportation Research Record, 1991.  1320 (1): p. 58-67.  9.  Wang, Y., et al.,  Local ramp metering in the presence of a distant downstream bottleneck: Theoretical  analysis and simulation study.  IEEE Transactions on Intelligent Transportation Systems, 2014.  15 (5): p.  2024-2039.  10.  Wattleworth, J.A.,  Peak-period analysis and control of a freeway system . 1965, Texas Transportation  Institute.  11.  Masher, D.P., et al.,  Guidelines for design and operation of ramp control systems . 1975, Stanford  Research Institute: California, U.S.  12.  Papageorgiou, M., H. Hadj-Salem, and J.-M. Blosseville,  ALINEA: A local feedback control law for on- ramp metering.  Transportation Research Record: Jounral of the Transportation Research Board, 1991."
+        },
+        {
+          "block_id": "p15_b0",
+          "page": 15,
+          "bbox": [
+            72.0,
+            790.92,
+            303.48,
+            807.08
+          ],
+          "type": "paragraph",
+          "text": "15"
+        },
+        {
+          "block_id": "p15_b1",
+          "page": 15,
+          "bbox": [
+            71.84,
+            70.84,
+            525.44,
+            590.71
+          ],
+          "type": "paragraph",
+          "text": "1320 (1): p. 58-67.  13.  Smaragdis, E. and M. Papageorgiou,  Series of new local ramp metering strategies.  Transportation  Research Record: Journal of the Transportation Research Board, 2004.  1856 : p. 74-86.  14.  Papageorgiou, M., J.M. Blosseville, and H. Hajsalem,  Modeling and Real-Time Control of Traffic Flow  on the Southern Part of Boulevard-Peripherique in Paris .2. Coordinated on-Ramp Metering.   Transportation Research Part A: Policy and Practice, 1990.  24 (5): p. 361-370.  15.  Papamichail, I. and M. Papageorgiou,  Traffic-responsive linked ramp-metering control.  IEEE  Transactions on Intelligent Transportation Systems, 2008.  9 (1): p. 111-121.  16.  Papageorgiou, M. and R. Mayr,  Optimal Decomposition Methods Applied to Motorway Traffic Control.   International Journal of Control, 1982.  35 (2): p. 269-280.  17.  Bellemans, T., B. De Schutter, and B. De Moor,  Model predictive control for ramp metering of motorway  traffic: A case study.  Control Engineering Practice, 2006.  14 (7): p. 757-767.  18.  Papamichail, I., et al.,  Coordinated ramp metering for freeway networks - A model-predictive  hierarchical control approach.  Transportation Research Part C: Emerging Technologies, 2010.  18 (3): p.  311-331.  19.  Davarynejad, M., et al.,  Motorway ramp-metering control with queuing consideration using Q-learning ,  in  14th International IEEE Conference on Intelligent Transportation Systems (ITSC) . 2011, IEEE. p.  1652-1658.  20.  Rezaee, K., B. Abdulhai, and H. Abdelgawad,  Application of reinforcement learning with continuous  state space to ramp metering in real-world conditions , in  15th International IEEE Conference on  Intelligent Transportation Systems . 2012, IEEE. p. 1590-1595.  21.  Fares, A. and W. Gomaa,  Freeway ramp-metering control based on reinforcement learning , in  11th IEEE  International Conference on Control & Automation (ICCA) . 2014, IEEE. p. 1226-1231.  22.  Yang, H. and H. Rakha,  Reinforcement learning ramp metering control for weaving sections in a  connected vehicle environment , in  Transportation Research Board 96th Annual Meeting . 2017.  23.  Belletti, F., et al.,  Expert level control of ramp metering based on multi-task deep reinforcement learning.   IEEE Transactions on Intelligent Transportation Systems, 2018.  19 (4): p. 1198-1207.  24.  Deng, F., et al.  Advanced Self-Improving Ramp Metering Algorithm based on Multi-Agent Deep  Reinforcement Learning . in  2019 IEEE Intelligent Transportation Systems Conference (ITSC) . 2019.  IEEE.  25.  Gao, J., et al.,  Adaptive traffic signal control: Deep reinforcement learning algorithm with experience  replay and target network.  arXiv preprint arXiv:1705.02755, 2017.  26.  Wei, H., et al.  Intellilight: A reinforcement learning approach for intelligent traffic light control . in  Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data  Mining . 2018.  27.  Liang, X., et al.,  A deep reinforcement learning network for traffic light cycle control.  IEEE Transactions  on Vehicular Technology, 2019.  68 (2): p. 1243-1253.  28.  Sutton, R. and A. Barto,  Reinforcement Learning: An Introduction . 1998: MIT Press.  29.  Kingma, D.P. and J. Ba,  Adam: A method for stochastic optimization.  arXiv preprint arXiv:1412.6980,  2014.  30.  Mnih, V., et al.,  Human-level control through deep reinforcement learning.  Nature, 2015.  518 (7540): p.  529-533.  31.  Mnih, V., et al.,  Playing atari with deep reinforcement learning.  arXiv preprint arXiv:1312.5602, 2013.  32.  Krajzewicz, D., et al.,  Recent development and applications of SUMO-Simulation of Urban MObility.   International Journal On Advances in Systems and Measurements, 2012.  5 (3&4)."
+        }
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "figure_id": "fig_p3_0",
+      "page": 3,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p3_0.png",
+      "bbox": [
+        77.31980453619435,
+        553.362687756094,
+        505.38604084944524,
+        680.4482585644821
+      ],
+      "caption": "Figure 1: Two-phase control scheme for ramp metering.",
+      "caption_bbox": [
+        185.27999877929688,
+        692.7215576171875,
+        412.1687927246094,
+        706.1376953125
+      ],
+      "detection_confidence": 0.8712
+    },
+    {
+      "figure_id": "fig_p4_0",
+      "page": 4,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p4_0.png",
+      "bbox": [
+        165.21389853854137,
+        154.19576001193897,
+        479.7827612484203,
+        275.77933666122846
+      ],
+      "caption": "Figure 2: Ramp metering in the general scheme of RL.",
+      "caption_bbox": [
+        188.0399932861328,
+        264.5999450683594,
+        493.79998779296875,
+        289.4977111816406
+      ],
+      "detection_confidence": 0.9023
+    },
+    {
+      "figure_id": "fig_p5_0",
+      "page": 5,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p5_0.png",
+      "bbox": [
+        87.12914540266792,
+        76.03346151742454,
+        505.85600927016316,
+        330.304548532186
+      ],
+      "caption": "Figure 3: State representation.    The position matrix additionally contains the information of the signal states:",
+      "caption_bbox": [
+        108.0,
+        319.5599670410156,
+        510.4800109863281,
+        376.1639709472656
+      ],
+      "detection_confidence": 0.9137
+    },
+    {
+      "figure_id": "fig_p6_0",
+      "page": 6,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p6_0.png",
+      "bbox": [
+        87.77910172919265,
+        483.85566072711885,
+        503.7561503690832,
+        645.8321699722245
+      ],
+      "caption": "Figure 4: 4 Approaches for stabilizing the training process in deep Q-learning: a) relay buffer; b) target network.",
+      "caption_bbox": [
+        72.0,
+        634.0800170898438,
+        524.8333129882812,
+        676.8839721679688
+      ],
+      "detection_confidence": 0.8824
+    },
+    {
+      "figure_id": "fig_p8_0",
+      "page": 8,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p8_0.png",
+      "bbox": [
+        73.39506825679491,
+        70.61642094661362,
+        486.7172952860343,
+        425.1877121096648
+      ],
+      "caption": "Figure 5: Road network considered in the case study.",
+      "caption_bbox": [
+        191.16000366210938,
+        417.47998046875,
+        490.20001220703125,
+        442.377685546875
+      ],
+      "detection_confidence": 0.9169
+    },
+    {
+      "figure_id": "fig_p8_1",
+      "page": 8,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p8_1.png",
+      "bbox": [
+        139.24064379780233,
+        573.0969065883195,
+        435.43074145918126,
+        717.3980721996998
+      ],
+      "caption": "Figure 6: Traffic volumes in the mainline and the on-ramp.",
+      "caption_bbox": [
+        72.0,
+        714.3599243164062,
+        470.75994873046875,
+        757.4159545898438
+      ],
+      "detection_confidence": 0.8943
+    },
+    {
+      "figure_id": "fig_p9_0",
+      "page": 9,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p9_0.png",
+      "bbox": [
+        70.97523085650276,
+        152.66659542276173,
+        506.8159447677997,
+        241.2382071174599
+      ],
+      "caption": "Figure 7: Structure of the deep neural network.",
+      "caption_bbox": [
+        203.52000427246094,
+        223.55992126464844,
+        508.43994140625,
+        248.4576873779297
+      ],
+      "detection_confidence": 0.8907
+    },
+    {
+      "figure_id": "fig_p10_0",
+      "page": 10,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p10_0.png",
+      "bbox": [
+        76.10988583604828,
+        77.78250598216977,
+        482.06260805530707,
+        221.93875076647117
+      ],
+      "caption": "Figure 8: Vehicle travel times in the mainline.    Table 3 presents mean vehicle travel times in 20 simulation experiments. It is found that  the performance of the PI-ALINEA method is not always better than the no-control scenario.  For example, compared with the no-control scenario, the PI-ALINEA method increases vehicle  travel time by 10% in the 6th experiment. In contrast, the proposed DRL method consistently  results in shorter travel time than that of the no-control scenario, demonstrating the stable  performance of the proposed method. On average, the DRL method reduces vehicle travel time  by 13% when compared with the no-control scenario.",
+      "caption_bbox": [
+        71.99996948242188,
+        197.87998962402344,
+        525.9600830078125,
+        337.2839050292969
+      ],
+      "detection_confidence": 0.9009
+    },
+    {
+      "figure_id": "fig_p11_0",
+      "page": 11,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p11_0.png",
+      "bbox": [
+        92.91875637278837,
+        626.4727463824445,
+        499.9614053549887,
+        770.3341522426889
+      ],
+      "caption": "Figure 10: Queue Length at the on-ramp.",
+      "caption_bbox": [
+        215.39999389648438,
+        745.7999267578125,
+        508.2000427246094,
+        770.6976928710938
+      ],
+      "detection_confidence": 0.8824
+    },
+    {
+      "figure_id": "fig_p12_0",
+      "page": 12,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p12_0.png",
+      "bbox": [
+        94.19867036963711,
+        243.32706593535565,
+        503.2061873235623,
+        510.64102738721715
+      ],
+      "caption": "Figure 11: Queue length and occupancy for a) PI-ALINEA and b) DRL.",
+      "caption_bbox": [
+        72.0,
+        501.9598083496094,
+        508.1999206542969,
+        544.8839721679688
+      ],
+      "detection_confidence": 0.9112
+    },
+    {
+      "figure_id": "fig_p13_0",
+      "page": 13,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p13_0.png",
+      "bbox": [
+        207.2410745444418,
+        77.63758515509087,
+        386.6590186495741,
+        255.38048093239988
+      ],
+      "caption": "Figure 12: Relationship of queue length and red ratio for a) PI-ALINEA and b) DRL.    The better performance of the proposed DRL method is further revealed when  considering traffic flows downstream of the merge area, which is demonstrated in Fig. 13. At  the beginning traffic flows in three scenarios are close. During the peak period between 8:10- 8:35, the flows resulting from the DRL method are higher and more stable, suggesting that the  proposed DRL method could better alleviate the negative impacts of \u201ccapacity drop\u201d resulting  from massive merging behaviors. When traffic demand decreases during 8:40-9:00, traffic  flows in the two ramp metering scenarios also decline. Nevertheless, traffic flows in the no- control scenario are still high during 8:45-8:55 since more vehicles are held in the system in  the previous periods.",
+      "caption_bbox": [
+        72.0,
+        248.3280029296875,
+        525.9600219726562,
+        415.5238342285156
+      ],
+      "detection_confidence": 0.9105
+    },
+    {
+      "figure_id": "fig_p13_1",
+      "page": 13,
+      "image_path": "data/processed\\2012.12104v1\\figures\\fig_p13_1.png",
+      "bbox": [
+        91.88882557844914,
+        432.25385174723556,
+        501.65129180395303,
+        583.521211598201
+      ],
+      "caption": "Figure 13: Downstream volume in three scenarios.",
+      "caption_bbox": [
+        196.1999969482422,
+        571.7278442382812,
+        508.2000427246094,
+        596.937744140625
+      ],
+      "detection_confidence": 0.888
+    }
+  ],
+  "tables": [
+    {
+      "table_id": "table_p7_1",
+      "page": 7,
+      "bbox": [
+        84.80142950439453,
+        88.33964039650941,
+        422.7103451242755,
+        375.826061335637
+      ],
+      "caption": "Table 1: Deep Q-learning for ramp metering.",
+      "caption_bbox": [
+        207.36,
+        74.45772,
+        387.45771600000006,
+        84.41772000000003
+      ],
+      "table_path": "data/processed\\2012.12104v1\\tables\\table_p7_1.txt",
+      "data": [
+        [
+          "nput: Batch size k, Learning rate \u03b7, Decision step size L, Exploration rate \u03b5,",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Freezing interval F, Number of training episode N,",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Number of training time steps T in one episode",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "ill the replay buffer randomly",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "nitialize the action-value function Q with random weights w",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "nitialize the target network Q\u2013 with weights w\u2013 = w",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "or episode =",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "\u2190 0for t =",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "if mod {(1t,, \u22efL) ,=\ud835\udc41\ud835\udc41=} 0",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Ob{s1er,v\u22efe ,s\ud835\udc47\ud835\udc47ta}te s t and choose action a t by \u03b5-greedy strategy",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Execute action a, t obtain reward",
+          ", state",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Store transition <",
+          ",",
+          ",",
+          ",",
+          ",",
+          ",",
+          "> into replay buffer"
+        ],
+        [
+          "\ud835\udc61\ud835\udc61",
+          "\ud835\udc61\ud835\udc61 + \ud835\udc3f\ud835\udc3f",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Uniformly sample k transitions fr\ud835\udc5f\ud835\udc5fo m repl\ud835\udc60\ud835\udc60a y b uffer",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Compute the grad\ud835\udc60\ud835\udc60i \ud835\udc61\ud835\udc61 en\ud835\udc4e\ud835\udc4et \ud835\udc61\ud835\udc61 \ud835\udc5f\ud835\udc5f\ud835\udc61\ud835\udc61 \ud835\udf07\ud835\udf07\ud835\udc61\ud835\udc61",
+          "\ud835\udc62\ud835\udc62\ud835\udc61\ud835\udc61 \ud835\udc60\ud835\udc60\ud835\udc61\ud835\udc61+ \ud835\udc3f\ud835\udc3f",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Update weights w in Q-network by ADAM with learning rate \u03b7",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "\u2207\ud835\udc64\ud835\udc64(\u21121 + \ud835\udf06\ud835\udf06\u21122)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "end if",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "if mo\ud835\udc53\ud835\udc53d \u2190(f, \ud835\udc53\ud835\udc53F)+ =1= 0",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Update target network Q\u2013 : w\u2013",
+          "w",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "end if",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "end for",
+          "\u2190",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "nd for",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "detection_confidence": 0.7998
+    },
+    {
+      "table_id": "table_p9_1",
+      "page": 9,
+      "bbox": [
+        187.5126337083386,
+        279.6186850210336,
+        378.58162270429057,
+        409.5354287610176
+      ],
+      "caption": "Table 2: Key parameters in Deep Q-learning for Ramp Metering",
+      "caption_bbox": [
+        167.27556000000004,
+        265.49928,
+        427.6259760000001,
+        275.45928000000004
+      ],
+      "table_path": "data/processed\\2012.12104v1\\tables\\table_p9_1.txt",
+      "data": [
+        [
+          "Parameters",
+          "Value"
+        ],
+        [
+          "Replay buffer size B",
+          "2\u00d7105"
+        ],
+        [
+          "Learning rate \u03b7",
+          "2.5\u00d710-4"
+        ],
+        [
+          "Batch size k",
+          "32"
+        ],
+        [
+          "Exploration rate \u03b5",
+          "0.1"
+        ],
+        [
+          "Freeze interval F",
+          "104"
+        ],
+        [
+          "Decision step size L",
+          "4 s"
+        ],
+        [
+          "Reward weight \u03bc",
+          "0.5"
+        ],
+        [
+          "Reward weight \u03c9",
+          "-0.1"
+        ]
+      ],
+      "detection_confidence": 0.9997
+    },
+    {
+      "table_id": "table_p10_1",
+      "page": 10,
+      "bbox": [
+        73.41306201467206,
+        364.95654596103765,
+        519.6467401477445,
+        537.0477684795673
+      ],
+      "caption": "Table 3: Mean travel times in 20 simulation experiments (s)",
+      "caption_bbox": [
+        176.4,
+        352.49771999999996,
+        418.4100719999999,
+        362.45772
+      ],
+      "table_path": "data/processed\\2012.12104v1\\tables\\table_p10_1.txt",
+      "data": [
+        [
+          "No",
+          "No.",
+          "No",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "No.",
+          "PI-ALINEA",
+          "DRL",
+          "PI-ALINEA",
+          "DRL",
+          "",
+          "",
+          ""
+        ],
+        [
+          "controls",
+          "controls",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "1",
+          "186",
+          "179 [-4%]",
+          "171 [-8%]",
+          "11",
+          "188",
+          "173[-8%]",
+          "167[-11%]"
+        ],
+        [
+          "2",
+          "203",
+          "173[-15%]",
+          "171[-16%]",
+          "12",
+          "211",
+          "182[-14%]",
+          "170[-19%]"
+        ],
+        [
+          "3",
+          "217",
+          "175[-19%]",
+          "177[-18%]",
+          "13",
+          "219",
+          "175[-20%]",
+          "172[-21%]"
+        ],
+        [
+          "4",
+          "227",
+          "181[-20%]",
+          "181[-20%]",
+          "14",
+          "170",
+          "172[+1%]",
+          "170[-0%]"
+        ],
+        [
+          "5",
+          "202",
+          "173[-14%]",
+          "177[-12%]",
+          "15",
+          "187",
+          "182[-3%]",
+          "175[-6%]"
+        ],
+        [
+          "6",
+          "178",
+          "195 [+10%]",
+          "173[-3%]",
+          "16",
+          "216",
+          "170[-21%]",
+          "179[-17%]"
+        ],
+        [
+          "7",
+          "185",
+          "178[-4%]",
+          "174[-6%]",
+          "17",
+          "177",
+          "192[+8%]",
+          "174[-2%]"
+        ],
+        [
+          "8",
+          "226",
+          "180[-20%]",
+          "173[-23%]",
+          "18",
+          "228",
+          "169[-26%]",
+          "172[-25%]"
+        ],
+        [
+          "9",
+          "175",
+          "214 [+22%]",
+          "169[-3%]",
+          "19",
+          "190",
+          "179[-6%]",
+          "175[-8%]"
+        ],
+        [
+          "10",
+          "206",
+          "183[-11%]",
+          "175[-15%]",
+          "20",
+          "194",
+          "180[-7%]",
+          "170[-12%]"
+        ]
+      ],
+      "detection_confidence": 0.9999
+    }
+  ]
+}

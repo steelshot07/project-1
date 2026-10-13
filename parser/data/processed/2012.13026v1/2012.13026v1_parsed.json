@@ -1,0 +1,3736 @@
+{
+  "doc_id": "2012.13026v1",
+  "metadata": {
+    "title": "Unknown Title",
+    "authors": "Unknown Author",
+    "total_pages": 8
+  },
+  "pages": [
+    {
+      "page_number": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p1_b0",
+          "bbox": [
+            117.57,
+            99.83,
+            494.43,
+            117.05
+          ],
+          "type": "paragraph",
+          "text": "Rethink AI-based Power Grid Control:   Diving Into"
+        },
+        {
+          "block_id": "p1_b1",
+          "bbox": [
+            240.42,
+            119.76,
+            370.96,
+            136.97
+          ],
+          "type": "paragraph",
+          "text": "Algorithm Design"
+        },
+        {
+          "block_id": "p1_b2",
+          "bbox": [
+            129.48,
+            177.47,
+            482.02,
+            191.05
+          ],
+          "type": "paragraph",
+          "text": "Xiren Zhou 1 , Siqi Wang 2 , Ruisheng Diao 2 , Desong Bian 2 , Jiajun Duan 2   and Di Shi 2"
+        },
+        {
+          "block_id": "p1_b3",
+          "bbox": [
+            115.65,
+            191.45,
+            496.42,
+            236.92
+          ],
+          "type": "paragraph",
+          "text": "1 Columbia University 1   xz2754@columbia.edu 2 Global Energy Interconnection Research Institute North America(GEIRINA) 2 {siqi.wang,   ruisheng.diao,   desong.bian,   jiajun.duan,   di.shi}@geirina.net"
+        },
+        {
+          "block_id": "p1_b4",
+          "bbox": [
+            283.76,
+            266.27,
+            328.24,
+            278.22
+          ],
+          "type": "heading",
+          "text": "Abstract"
+        },
+        {
+          "block_id": "p1_b5",
+          "bbox": [
+            143.56,
+            294.65,
+            469.88,
+            402.78
+          ],
+          "type": "paragraph",
+          "text": "Recently, deep reinforcement learning (DRL)-based approach has shown promise in solving complex decision and control problems in power engineering domain. In this paper, we present an in-depth analysis of DRL-based voltage control from aspects of algorithm selection, state space representation, and reward engineering. To resolve observed issues, we propose a novel imitation learning-based approach to directly map power grid operating points to effective actions without any interim reinforcement   learning   process.   The   performance   results   demonstrate   that   the proposed approach has strong generalization ability with much less training time. The   agent   trained   by   imitation   learning   is   effective   and   robust   to   solve   voltage control problem and outperforms the former RL agents."
+        },
+        {
+          "block_id": "p1_b6",
+          "bbox": [
+            108.0,
+            432.42,
+            190.81,
+            444.37
+          ],
+          "type": "heading",
+          "text": "1 Introduction"
+        },
+        {
+          "block_id": "p1_b7",
+          "bbox": [
+            107.64,
+            459.9,
+            505.25,
+            709.94
+          ],
+          "type": "paragraph",
+          "text": "Nowadays,   the   rapid   development   of   arti\ufb01cial   intelligence   (AI)   technologies   provides   new   ideas and   solutions   for   solving   many   challenges   in   the   \ufb01eld   of   power   grid   operation   and   control.   The application of deep reinforcement learning has been extensively explored to solve complex power engineering problems, such as grid emergency control [1], real-time autonomous energy management [2] and topology adjustment [3].   Speci\ufb01cally, DRL-based power grid control paradigm has become a hot spot and provides effective future development direction for both power system research and engineering community.   The pioneer work in [4] presents a novel autonomous control paradigm called \"Grid Mind\" to derive fast and effective controls in real time with Deep Q Network (DQN) agent to eliminate voltage violations.   Later on, the follow-up work in [5] expands the \ufb01ndings of [4] and modi\ufb01ed the DQN algorithm to improve control performance by avoiding the choice of same actions multiple times and normalizing the observations.   Similar ideas have been further expanded in [6] and [7] for controlling the voltage setpoint of generators and PV-converters in a continuous manner by employing Deep Deterministic Policy Gradient (DDPG) agent.   However, the previous work is mainly focused on demonstrating that the state-of-art DRL algorithm can be plugged in to the power grid control framework.   Different from the previous exploration, in this paper, we investigate the underlying nature of power grid voltage control and revisit it from the Markov Decision Process (MDP)   point   of   view,   mainly   focusing   on   tuning   the design   of   the   problem   formulation,   i.e.,   the choice of state representation, the DRL algorithm selection, and the reward engineering.   Moreover, we present the lessons learnt from training an effective DRL agent using the real world power grid data collected from the control center of SGCC Jiangsu Electric Power Company.   We further propose an imitation learning-based approach to resolve the voltage control problem based upon the \ufb01ndings of   the   training   process   and   demonstrate   that   the   imitation   learning   approach   is   also   an   effective alternative without any reinforcement learning component for this type of voltage control problem."
+        },
+        {
+          "block_id": "p1_b8",
+          "bbox": [
+            107.58,
+            733.08,
+            460.04,
+            742.04
+          ],
+          "type": "paragraph",
+          "text": "Workshop on machine learning for engineering modeling, simulation and design @ NeurIPS 2020"
+        },
+        {
+          "block_id": "p1_b9",
+          "bbox": [
+            10.94,
+            215.62,
+            37.62,
+            560.0
+          ],
+          "type": "paragraph",
+          "text": "arXiv:2012.13026v1  [cs.AI]  23 Dec 2020"
+        }
+      ]
+    },
+    {
+      "page_number": 2,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p2_b0",
+          "bbox": [
+            108.0,
+            72.79,
+            233.34,
+            84.74
+          ],
+          "type": "heading",
+          "text": "2 Problem formulation"
+        },
+        {
+          "block_id": "p2_b1",
+          "bbox": [
+            107.69,
+            97.8,
+            504.0,
+            140.56
+          ],
+          "type": "paragraph",
+          "text": "The main objective of power system voltage control is to maintain bus voltage pro\ufb01les within the prede\ufb01ned bounds and at the same time keeping transmission line \ufb02ows within limits.   The state is the current operating condition of the power grid represented by the power \ufb02ow snapshot at a given timestamp.   We model the power grid control problem as an MDP as follows:"
+        },
+        {
+          "block_id": "p2_b2",
+          "bbox": [
+            135.4,
+            148.83,
+            504.0,
+            195.42
+          ],
+          "type": "paragraph",
+          "text": "\u2022   S :   an in\ufb01nite state space of continuous-valued state representation.   S   \u2208 R n s . Three types of measurement values can be adopted to construct state space:   bus values (bus voltage  V m   and bus angle  V a ), branch values (line \ufb02ow  S line ), and generator values (active power  P g   and reactive power  Q g )."
+        },
+        {
+          "block_id": "p2_b3",
+          "bbox": [
+            135.4,
+            196.97,
+            505.75,
+            242.07
+          ],
+          "type": "paragraph",
+          "text": "\u2022   A :   an in\ufb01nite action space of continuous-valued action vector.   A  \u2208 R n a . The voltage setpoints of generators within each power plant are used to control bus voltages. Therefore n a   represents the number of power plants in the studied power grid.   The plant voltage value is bounded within the range of [0.9, 1.1] in p.u."
+        },
+        {
+          "block_id": "p2_b4",
+          "bbox": [
+            135.4,
+            245.92,
+            504.0,
+            312.03
+          ],
+          "type": "paragraph",
+          "text": "\u2022   P :   a transition dynamics model that speci\ufb01es  P ( s \u2032 | s, a ) . In essence, the transition probability  P ( s \u2032 | s, a )  is determined and dominated by the physics laws and all con\ufb01gurations of its underlying environment.   In this design, we use an in-house power \ufb02ow solver (simulator) to model the transitions from state  s  to state  s \u2032   after applying action  a , i.e.,  P ( s \u2032 | s, a ) = 1  where  s \u2032   is obtained from the power \ufb02ow solver given the input s  and  a .   Thus,  P   is a sparse/one-hot matrix (of in\ufb01nite dimension) in our MDP."
+        },
+        {
+          "block_id": "p2_b5",
+          "bbox": [
+            135.4,
+            317.25,
+            504.0,
+            350.53
+          ],
+          "type": "paragraph",
+          "text": "\u2022   R :   a reward function that maps a state action pair to a real number. Due   to   the   sparse   property   of   P   mentioned   above,   the   reward   at   time   step   t   can   also   be determined by the resulting state at time step  t  + 1 .   i.e.,  r t   =  R ( s t , a t ) =  R ( s t +1 ) ."
+        },
+        {
+          "block_id": "p2_b6",
+          "bbox": [
+            135.4,
+            354.49,
+            389.62,
+            364.68
+          ],
+          "type": "paragraph",
+          "text": "\u2022   \u03b3 :   the discount factor.   It is \ufb01xed to 0.99 throughout the paper."
+        },
+        {
+          "block_id": "p2_b7",
+          "bbox": [
+            107.75,
+            375.12,
+            505.25,
+            439.86
+          ],
+          "type": "paragraph",
+          "text": "Moreover, we de\ufb01ne a set of terminal states  T   which is composed of all the states without voltage violation for all buses and without line \ufb02ow violation for all lines.   A state  s  is \"unsuccessful\" iff s   / \u2208 T ,   meaning   that   there   exists   either   voltage   violations   or   line   \ufb02ow   violations   at   the   current operating condition.   Likewise, we de\ufb01ne any  s  \u2208 T   as a \"successful\" state.   The MDP is episodic by de\ufb01ning terminal states as above and enforcing a horizon limit for each episode (e.g., 50, 100, 1000, etc.)."
+        },
+        {
+          "block_id": "p2_b8",
+          "bbox": [
+            107.64,
+            446.06,
+            504.67,
+            488.98
+          ],
+          "type": "paragraph",
+          "text": "In summary, the ultimate goal for the DRL agent is to \ufb01nd a policy  \u03c0  (a mapping from state to action) that can eliminate both voltage violations and line \ufb02ow violations as quickly as possible.   In other words, given an unsuccessful initial state, the policy is desired to be able to make effective sequence of decisions that leads to a successful state in as few number of steps as possible."
+        },
+        {
+          "block_id": "p2_b9",
+          "bbox": [
+            108.0,
+            506.37,
+            214.38,
+            518.33
+          ],
+          "type": "heading",
+          "text": "3 Data preparation"
+        },
+        {
+          "block_id": "p2_b10",
+          "bbox": [
+            107.53,
+            531.54,
+            505.24,
+            585.06
+          ],
+          "type": "paragraph",
+          "text": "We collected 10,433 power \ufb02ow snapshots from the control center of SGCC Jiangsu Power Company, which represents the power grid operating conditions from January to March, 2020.   The snapshots are stored in *.dat format, each of which can be treated as an unsuccessful initial state  s 0 .   To eliminate the seasonal impact of co-relation, the entire dataset is randomly split into 9,433 and 1,000 for training and testing, respectively, i.e.:"
+        },
+        {
+          "block_id": "p2_b11",
+          "bbox": [
+            169.2,
+            593.08,
+            221.72,
+            607.38
+          ],
+          "type": "paragraph",
+          "text": "S train   =  { s (1)"
+        },
+        {
+          "block_id": "p2_b12",
+          "bbox": [
+            211.53,
+            593.08,
+            357.21,
+            608.54
+          ],
+          "type": "paragraph",
+          "text": "0   , s (2) 0   , ..., s (9433) 0 } ;  S test   =  { s (9434)"
+        },
+        {
+          "block_id": "p2_b13",
+          "bbox": [
+            335.09,
+            593.08,
+            388.92,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 , s (9435)"
+        },
+        {
+          "block_id": "p2_b14",
+          "bbox": [
+            366.8,
+            593.08,
+            437.33,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 , ..., s (10433)"
+        },
+        {
+          "block_id": "p2_b15",
+          "bbox": [
+            411.24,
+            595.79,
+            504.0,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 } (1)"
+        },
+        {
+          "block_id": "p2_b16",
+          "bbox": [
+            108.0,
+            623.51,
+            313.43,
+            635.47
+          ],
+          "type": "heading",
+          "text": "4 RL-based power grid voltage control"
+        },
+        {
+          "block_id": "p2_b17",
+          "bbox": [
+            108.0,
+            648.51,
+            213.7,
+            658.47
+          ],
+          "type": "heading",
+          "text": "4.1 Algorithm selection"
+        },
+        {
+          "block_id": "p2_b18",
+          "bbox": [
+            107.64,
+            668.82,
+            504.67,
+            722.42
+          ],
+          "type": "paragraph",
+          "text": "Both of value based RL algorithm (i.e., DQN) and policy gradient based RL algorithm (i.e., DDPG) have been studied in previous work to some extent.   But policy gradient RL algorithms tend to be more appropriate and effective in solving power grid control problem for the following reasons:   1) policy gradient based algorithms are proven to converge to at least local optimum (under certain conditions) whereas DQN does not have such guarantee mathematically [8]; 2) an ordinary DQN is dif\ufb01cult to"
+        },
+        {
+          "block_id": "p2_b19",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "2"
+        }
+      ]
+    },
+    {
+      "page_number": 3,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p3_b0",
+          "bbox": [
+            108.0,
+            74.42,
+            504.0,
+            117.1
+          ],
+          "type": "paragraph",
+          "text": "deal with in\ufb01nite continuous action space while both action space and state space of voltage control are continuous.   In this work, we consider soft actor critic (SAC) as our policy gradient RL algorithm instead of DDPG to enable more incentives for randomness in actions, which is important in \ufb01nding a good plant voltage point through exploration [9]."
+        },
+        {
+          "block_id": "p3_b1",
+          "bbox": [
+            108.0,
+            133.87,
+            236.67,
+            143.83
+          ],
+          "type": "heading",
+          "text": "4.2 Reward design strategies"
+        },
+        {
+          "block_id": "p3_b2",
+          "bbox": [
+            107.64,
+            154.65,
+            504.0,
+            219.39
+          ],
+          "type": "paragraph",
+          "text": "As mentioned before, the goal of training RL agents is to move from an unsuccessful state  s 0   to a successful state in as few steps as possible.   However, in SAC formulation, the agent is optimized directly upon the discounted sum of rewards instead of the number of steps per episode.   Therefore, a well-designed reward function plays a critical role in training an effective agent.   The agent must have the capability to learn lessons ef\ufb01ciently from the variation of the rewards to shorten its number of steps within an episode."
+        },
+        {
+          "block_id": "p3_b3",
+          "bbox": [
+            108.0,
+            225.74,
+            504.35,
+            290.93
+          ],
+          "type": "paragraph",
+          "text": "Intuitively,   the   essence   of   the   policy   gradient   formula   is   to   increase   the   probability   of   taking   the actions   that   receive   large   rewards   and   decrease   the   probability   of   taking   the   actions   that   receive small rewards.   A good reward function design should be able to direct the policy network effectively through   rewards   and   penalties   (i.e.   small   positive   rewards   or   even   negative   rewards).   With   this assumption, we de\ufb01ne our reward function R by dividing it up into two separate functions  R \u2212 and R + , according to the types of a transition step (either successful or unsuccessful).   i.e.,"
+        },
+        {
+          "block_id": "p3_b4",
+          "bbox": [
+            215.26,
+            308.11,
+            283.84,
+            319.56
+          ],
+          "type": "paragraph",
+          "text": "r t   =  R ( s t , a t ) ="
+        },
+        {
+          "block_id": "p3_b5",
+          "bbox": [
+            286.6,
+            301.22,
+            504.0,
+            326.11
+          ],
+          "type": "paragraph",
+          "text": "\u001a R \u2212 ( s t +1 ) , if  s t +1   / \u2208 T R + ( s t +1 ) , if  s t +1   \u2208 T (2)"
+        },
+        {
+          "block_id": "p3_b6",
+          "bbox": [
+            107.64,
+            341.24,
+            346.96,
+            351.21
+          ],
+          "type": "paragraph",
+          "text": "And we propose the following two reward design strategies:"
+        },
+        {
+          "block_id": "p3_b7",
+          "bbox": [
+            131.41,
+            362.44,
+            300.87,
+            384.15
+          ],
+          "type": "heading",
+          "text": "1.   R \u2212 ( s ) =  f penalty ( V m , S line ) ; R + ( s )  is a \ufb01xed non-negative constant."
+        },
+        {
+          "block_id": "p3_b8",
+          "bbox": [
+            131.41,
+            390.21,
+            272.67,
+            400.54
+          ],
+          "type": "heading",
+          "text": "2.   CartPole-style reward:   R  \u2261\u2212 1 ."
+        },
+        {
+          "block_id": "p3_b9",
+          "bbox": [
+            107.64,
+            411.46,
+            198.94,
+            428.89
+          ],
+          "type": "paragraph",
+          "text": "where   f penalty   =   \u03b1   P"
+        },
+        {
+          "block_id": "p3_b10",
+          "bbox": [
+            198.94,
+            411.46,
+            300.15,
+            428.89
+          ],
+          "type": "paragraph",
+          "text": "i   line_over\ufb02ow [ i ]   +   \u03b2  P"
+        },
+        {
+          "block_id": "p3_b11",
+          "bbox": [
+            108.0,
+            411.77,
+            504.0,
+            435.6
+          ],
+          "type": "paragraph",
+          "text": "j   bus_violation [ j ]   computes   the   penalty   (negative reward) of a given state according to its  S line   and  V m ."
+        },
+        {
+          "block_id": "p3_b12",
+          "bbox": [
+            107.69,
+            440.3,
+            475.7,
+            450.5
+          ],
+          "type": "paragraph",
+          "text": "The over\ufb02ow of the  i th line and the voltage violation of the  j th bus are de\ufb01ned as following:"
+        },
+        {
+          "block_id": "p3_b13",
+          "bbox": [
+            123.76,
+            459.36,
+            332.24,
+            471.95
+          ],
+          "type": "paragraph",
+          "text": "line_over\ufb02ow [ i ] = max { S line [ i ]  \u2212 line_limit [ i ] ,  0 } 2"
+        },
+        {
+          "block_id": "p3_b14",
+          "bbox": [
+            123.76,
+            468.15,
+            504.0,
+            485.84
+          ],
+          "type": "paragraph",
+          "text": "bus_violation [ j ] = max { ( V m [ j ]  \u2212 bus_lower_limit [ j ])( V m [ j ]  \u2212 bus_upper_limit [ j ]) ,  0 } (3)"
+        },
+        {
+          "block_id": "p3_b15",
+          "bbox": [
+            108.0,
+            495.3,
+            504.0,
+            516.41
+          ],
+          "type": "paragraph",
+          "text": "\u03b1  and  \u03b2   are used to balance the importance between line over\ufb02ow and bus voltage violation, which are set to  \u2212 0 . 1  and  \u2212 1000  respectively throughout this paper."
+        },
+        {
+          "block_id": "p3_b16",
+          "bbox": [
+            107.64,
+            522.9,
+            505.74,
+            565.52
+          ],
+          "type": "paragraph",
+          "text": "Since the optimization objective is the average number of steps needed to solve an unsuccessful state, which   is   basically   the   length   of   the   episode,   we   attempt   to   make   the   agent   learn   directly   from   it. Hence, strategy 2 is proposed to make the length of an episode re\ufb02ected by the return value.   We call it \"CartPole-style\" reward since this is similar to the reward style of the CartPole environment [10]."
+        },
+        {
+          "block_id": "p3_b17",
+          "bbox": [
+            108.0,
+            571.91,
+            504.35,
+            625.55
+          ],
+          "type": "paragraph",
+          "text": "It is the goal that under either of the two strategies above, the agent will converge to a theoretically optimal policy that solves all voltage violation cases in one step.   However, it is dif\ufb01cult to achieve in real world, because power grid is such a complex system that we are not able to theoretically ensure it is Markovian.   Meanwhile, for some voltage violation cases, there might not exist any one-step solution, given that we only enable control over plant voltage value settings."
+        },
+        {
+          "block_id": "p3_b18",
+          "bbox": [
+            107.64,
+            632.05,
+            504.0,
+            652.84
+          ],
+          "type": "paragraph",
+          "text": "In the next section, we demonstrate the experiment results of different reward function designs, where we end up with a best reward design pattern and obtain some insights into power grid MDP."
+        },
+        {
+          "block_id": "p3_b19",
+          "bbox": [
+            108.0,
+            669.61,
+            231.71,
+            679.58
+          ],
+          "type": "heading",
+          "text": "4.3 Experiments & analysis"
+        },
+        {
+          "block_id": "p3_b20",
+          "bbox": [
+            107.64,
+            690.4,
+            505.04,
+            723.67
+          ],
+          "type": "paragraph",
+          "text": "As shown in Table 1, we tried different values for  R +   for reward design strategy 1.   A higher  R + basically makes the training more ef\ufb01cient and converge to an optimal policy more quickly.   The SAC algorithm with  R +   = 0  fails to \ufb01nd an optimal policy."
+        },
+        {
+          "block_id": "p3_b21",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "3"
+        }
+      ]
+    },
+    {
+      "page_number": 4,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p4_b0",
+          "bbox": [
+            120.85,
+            71.02,
+            491.16,
+            82.71
+          ],
+          "type": "table_caption",
+          "text": "Table 1:   Training time needed til \ufb01nding the optimal policy under different  R +   for strategy 1"
+        },
+        {
+          "block_id": "p4_b1",
+          "bbox": [
+            170.96,
+            88.82,
+            438.55,
+            110.45
+          ],
+          "type": "paragraph",
+          "text": "R + 0 1 10 \u223c 20 50 80 \u223c 1000 training steps fail to converge 3.4k 1.3k 1k 0.9k"
+        },
+        {
+          "block_id": "p4_b2",
+          "bbox": [
+            108.0,
+            123.04,
+            505.75,
+            177.61
+          ],
+          "type": "paragraph",
+          "text": "For   strategy   2,   with   R   \u2261\u2212 1 ,   the   length   of   an   episode   is   directly   re\ufb02ected   by   its   sum   of   reward. However, it fails to converge to an optimal policy.   We then adjusted  R +   to 0 or 1, which is different from the original \"CartPole-style\" setting, since it is inappropriate to give the agent a penalty even on a successful step.   Unfortunately, the training diverges as well.   We \ufb01nally set a large value (1000) for R + , which eventually works well."
+        },
+        {
+          "block_id": "p4_b3",
+          "bbox": [
+            120.85,
+            190.15,
+            491.16,
+            201.84
+          ],
+          "type": "table_caption",
+          "text": "Table 2:   Training time needed til \ufb01nding the optimal policy under different  R +   for strategy 2"
+        },
+        {
+          "block_id": "p4_b4",
+          "bbox": [
+            151.63,
+            208.08,
+            457.88,
+            229.58
+          ],
+          "type": "paragraph",
+          "text": "R + -1 0 1 1000 training steps fail to converge fail to converge fail to converge 0.9k"
+        },
+        {
+          "block_id": "p4_b5",
+          "bbox": [
+            108.0,
+            242.61,
+            505.24,
+            307.04
+          ],
+          "type": "paragraph",
+          "text": "From these experiments, we \ufb01nd out that a higher positive reward makes the agent learn lessons more quickly and ef\ufb01ciently.   As for the negative reward on any unsuccessful step, according to formula 3, the penalty increases quadratically as the line \ufb02ow or bus voltage goes beyond the limit, which is a common design in this \ufb01eld.   However, It turns out that a well-designed meaningful  R \u2212 does not play a such signi\ufb01cant role as  R + ; even with  R \u2212 as a constant, as long as  R +   is large enough, the agents can learn very well."
+        },
+        {
+          "block_id": "p4_b6",
+          "bbox": [
+            107.69,
+            313.39,
+            504.0,
+            356.16
+          ],
+          "type": "paragraph",
+          "text": "These observations imply that the agent learns signi\ufb01cantly from the last successful steps.   Those unsuccessful steps give little helpful information to the RL agent.   It inspires us to train the agent with only successful steps and throw away all unsuccessful steps, which leads to the imitation learning based method that will be covered in the next section."
+        },
+        {
+          "block_id": "p4_b7",
+          "bbox": [
+            108.0,
+            374.38,
+            350.57,
+            386.34
+          ],
+          "type": "heading",
+          "text": "5 Imitation learning-based power grid control"
+        },
+        {
+          "block_id": "p4_b8",
+          "bbox": [
+            107.64,
+            408.78,
+            402.56,
+            418.83
+          ],
+          "type": "paragraph",
+          "text": "Algorithm 1  Imitation Learning for Training a Power Grid Control Agent"
+        },
+        {
+          "block_id": "p4_b9",
+          "bbox": [
+            117.6,
+            425.14,
+            301.65,
+            489.88
+          ],
+          "type": "paragraph",
+          "text": "Initialize: policy   network   \u03c0   with   random weights  \u03b8 D  = COLLECT SUCCESSFUL STEPS( S train ) l objective = 1   #   set   an   objective   average episode\u2019s length to terminate the runtime. while  True  do"
+        },
+        {
+          "block_id": "p4_b10",
+          "bbox": [
+            117.96,
+            490.6,
+            301.02,
+            511.7
+          ],
+          "type": "paragraph",
+          "text": "Train  \u03b8  with an optimizer (eg., Adam) on dataset  D  for an epoch"
+        },
+        {
+          "block_id": "p4_b11",
+          "bbox": [
+            117.96,
+            512.42,
+            302.26,
+            534.13
+          ],
+          "type": "paragraph",
+          "text": "l  = EVALUATE EPISODE LENGTH( S test , \u03c0 \u03b8 )"
+        },
+        {
+          "block_id": "p4_b12",
+          "bbox": [
+            132.91,
+            534.1,
+            208.0,
+            545.83
+          ],
+          "type": "paragraph",
+          "text": "if  l  \u2264 l objective   then"
+        },
+        {
+          "block_id": "p4_b13",
+          "bbox": [
+            147.85,
+            545.28,
+            189.35,
+            555.25
+          ],
+          "type": "paragraph",
+          "text": "terminate"
+        },
+        {
+          "block_id": "p4_b14",
+          "bbox": [
+            117.96,
+            567.08,
+            301.69,
+            577.25
+          ],
+          "type": "paragraph",
+          "text": "procedure  C OLLECT  S UCCESSFUL  S TEPS ( S )"
+        },
+        {
+          "block_id": "p4_b15",
+          "bbox": [
+            117.63,
+            577.86,
+            301.37,
+            610.0
+          ],
+          "type": "paragraph",
+          "text": "Initialize  D   =  \u2205 Set policy  \u03c0 collect   to be an arbitrary policy (eg., random policy, trained SAC policy, etc.)"
+        },
+        {
+          "block_id": "p4_b16",
+          "bbox": [
+            117.63,
+            610.72,
+            301.02,
+            631.82
+          ],
+          "type": "paragraph",
+          "text": "n  =  number of successful steps to collect (eg., 10000)"
+        },
+        {
+          "block_id": "p4_b17",
+          "bbox": [
+            132.91,
+            632.54,
+            265.58,
+            653.55
+          ],
+          "type": "paragraph",
+          "text": "t limit   = 1000  # set a horizon limit while  | D |  < n  do"
+        },
+        {
+          "block_id": "p4_b18",
+          "bbox": [
+            147.85,
+            654.35,
+            289.83,
+            676.59
+          ],
+          "type": "paragraph",
+          "text": "Randomly sample a state  s 0  from  S for  t  = 0 ,  1 ,  2 ..., t limit  \u2212 1  do"
+        },
+        {
+          "block_id": "p4_b19",
+          "bbox": [
+            365.78,
+            425.14,
+            464.97,
+            458.29
+          ],
+          "type": "paragraph",
+          "text": "a t   =  \u03c0 collect ( s t ) s t +1  \u2190 perform  a t  on  s t if  s t +1   \u2208 T   then"
+        },
+        {
+          "block_id": "p4_b20",
+          "bbox": [
+            335.89,
+            457.74,
+            461.21,
+            489.89
+          ],
+          "type": "paragraph",
+          "text": "D   =  D  \u222a{ ( s t , a t ) } break return  D"
+        },
+        {
+          "block_id": "p4_b21",
+          "bbox": [
+            320.94,
+            501.73,
+            505.24,
+            522.83
+          ],
+          "type": "paragraph",
+          "text": "procedure  E VALUATE  E PISODE  L ENGTH ( S , \u03c0 )"
+        },
+        {
+          "block_id": "p4_b22",
+          "bbox": [
+            320.94,
+            523.41,
+            504.0,
+            555.56
+          ],
+          "type": "paragraph",
+          "text": "Initialize  L  =  \u2205 n episodes = 50 # set number of episodes(cases) to evaluate"
+        },
+        {
+          "block_id": "p4_b23",
+          "bbox": [
+            335.89,
+            556.27,
+            458.6,
+            578.78
+          ],
+          "type": "paragraph",
+          "text": "t limit   = 50  # set a horizon limit for  i  = 1 ,  2 , ..., n episodes  do"
+        },
+        {
+          "block_id": "p4_b24",
+          "bbox": [
+            350.83,
+            578.09,
+            492.81,
+            600.33
+          ],
+          "type": "paragraph",
+          "text": "Randomly sample a state  s 0  from  S for  t  = 0 ,  1 ,  2 ..., t limit  \u2212 1  do"
+        },
+        {
+          "block_id": "p4_b25",
+          "bbox": [
+            365.78,
+            599.91,
+            499.01,
+            633.32
+          ],
+          "type": "paragraph",
+          "text": "a t   =  \u03c0 ( s t ) s t +1  \u2190 perform  a t  on  s t if  s t +1   \u2208 T   or  t  + 1 =  t limit  then"
+        },
+        {
+          "block_id": "p4_b26",
+          "bbox": [
+            335.89,
+            632.51,
+            449.35,
+            665.36
+          ],
+          "type": "paragraph",
+          "text": "L  =  L  \u222a{ t  + 1 } break return  E l \u2208 L [ l ]"
+        },
+        {
+          "block_id": "p4_b27",
+          "bbox": [
+            108.0,
+            701.55,
+            504.0,
+            722.43
+          ],
+          "type": "paragraph",
+          "text": "Inspired by the study in Section 4.3, an imitation learning method is proposed to train an agent with only successful steps.   Speci\ufb01cally,   the proposed method does not incorporate any reinforcement"
+        },
+        {
+          "block_id": "p4_b28",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "4"
+        }
+      ]
+    },
+    {
+      "page_number": 5,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p5_b0",
+          "bbox": [
+            107.69,
+            74.4,
+            505.74,
+            95.28
+          ],
+          "type": "paragraph",
+          "text": "learning component except a policy neural network mapping from a state vector to an action vector. The network is trained by supervised learning on a dataset  D :"
+        },
+        {
+          "block_id": "p5_b1",
+          "bbox": [
+            241.93,
+            102.23,
+            504.0,
+            113.69
+          ],
+          "type": "paragraph",
+          "text": "D   =  { ( s t , a t ) | where  s t +1   \u2208 T } (4)"
+        },
+        {
+          "block_id": "p5_b2",
+          "bbox": [
+            108.0,
+            129.26,
+            248.25,
+            141.21
+          ],
+          "type": "heading",
+          "text": "6 Performance & analysis"
+        },
+        {
+          "block_id": "p5_b3",
+          "bbox": [
+            108.0,
+            153.79,
+            288.73,
+            163.75
+          ],
+          "type": "heading",
+          "text": "6.1 Random policy baseline performance"
+        },
+        {
+          "block_id": "p5_b4",
+          "bbox": [
+            107.64,
+            173.5,
+            504.35,
+            238.36
+          ],
+          "type": "paragraph",
+          "text": "For   each   s 0   \u2208 S train   \u222a S test ,   a   random   agent   is   employed   to   interact   with   the   environment.   The simulation is conducted multiple times (episodes) for each  s 0  and the average number of steps needed to solve each case are recorded.   The maximum episode length is 1000.   If a case can never be solved within 1000 steps, it is considered as an \"unsolvable\" case.   Figure 1(a) shows the random policy performance on the entire dataset of 10,433 cases.   There are totally 142/10433 (1.36%) unsolvable cases."
+        },
+        {
+          "block_id": "p5_b5",
+          "bbox": [
+            108.0,
+            252.66,
+            232.54,
+            262.62
+          ],
+          "type": "heading",
+          "text": "6.2 SAC agent performance"
+        },
+        {
+          "block_id": "p5_b6",
+          "bbox": [
+            107.69,
+            272.49,
+            504.75,
+            413.6
+          ],
+          "type": "paragraph",
+          "text": "The SAC agent was trained with  R +   = 1000 .   The evaluation result of the agent is shown in Figure 1 and Table 3.   We evaulated the agent\u2019s policy with its stochastic (i.e., the action is sampled from a normal distribution given its learned mean and standard deviation) and greedy (i.e., the action is solely determined by its mean, which means a deterministic policy) variants respectively.   The greedy SAC policy is able to solve all cases in only one step; but there exist more unsolvable cases, compared with random policy.   The stochastic SAC policy, on the other hand, has a higher solvable rate (98.5% on train set and 98.4% on test set) but needs more steps on average to solve a voltage violation case.   One reason is that the state representation is still possibly not a Markovian representation (considering the complexity of power grid system), and adding randomness can alleviate the partial observability problem [11].   This is why a policy with distributed action or a random policy is able to solve more cases (regardless of steps cost) than a deterministic policy.   Despite the advantage of stochasticity, the deterministic policy is superior in that it solves a case instantly (one step).   In practice, it relies on the grid operators\u2019 engineering judgement to decide which policy is better."
+        },
+        {
+          "block_id": "p5_b8",
+          "bbox": [
+            108.0,
+            543.31,
+            504.34,
+            564.26
+          ],
+          "type": "figure_caption",
+          "text": "Figure   1:   Policy   performance   comparison.   (Case   indices   are   sorted   according   to   random   policy performance.   A case is considered unsolvable if its y value reaches  10 3 .)"
+        },
+        {
+          "block_id": "p5_b9",
+          "bbox": [
+            108.0,
+            580.3,
+            290.78,
+            590.27
+          ],
+          "type": "heading",
+          "text": "6.3 Imitation learning agent performance"
+        },
+        {
+          "block_id": "p5_b10",
+          "bbox": [
+            107.25,
+            600.01,
+            505.24,
+            722.43
+          ],
+          "type": "paragraph",
+          "text": "A dataset  D  is collected according to Algorithm 1 by running random policy, which contains  \u223c 20k successful   transitions   corresponding   to   S train .   In   other   words,   any   of   the   successful   transition   is generated within an episode starting with a certain initial state in  S train .   Note that there might be multiple transitions in  D  corresponding to the same  s 0   in  S train .   The network architecture is the same as the policy network of the former SAC agent (see Appendix).   The training takes only three epochs until \ufb01nding the optimal policy, which is much faster than the SAC algorithm.   As shown in Figure 1 and Table 3, the imitation learning agent performs even better than the SAC agent with a higher solvable rate.   It can solve any solvable case in one step.   The strong generalization ability of the imitation learning agent can be viewed in two aspects:   1)  D  was collected by exploring cases in  S train , and the agent is able to solve most cases in  S test   in one step;   2) consider  ( s, a )   \u2208 D   which is the successful step of an episode starting with  s ( i )"
+        },
+        {
+          "block_id": "p5_b11",
+          "bbox": [
+            285.14,
+            712.08,
+            504.0,
+            724.18
+          ],
+          "type": "paragraph",
+          "text": "0 \u2208 S test , since  D  was collected by running a random"
+        },
+        {
+          "block_id": "p5_b12",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "page_number": 6,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p6_b0",
+          "bbox": [
+            235.07,
+            71.2,
+            376.93,
+            81.16
+          ],
+          "type": "table_caption",
+          "text": "Table 3:   Policy performance details"
+        },
+        {
+          "block_id": "p6_b1",
+          "bbox": [
+            113.98,
+            92.67,
+            499.76,
+            102.64
+          ],
+          "type": "paragraph",
+          "text": "Policy Number of unsolvable cases Avg steps to solve a case"
+        },
+        {
+          "block_id": "p6_b2",
+          "bbox": [
+            113.98,
+            108.7,
+            460.85,
+            129.66
+          ],
+          "type": "paragraph",
+          "text": "random policy train set:   127/9433(1.35%) train set:   11.53 test set:   13/1000(1.3%) test set:   11.98"
+        },
+        {
+          "block_id": "p6_b3",
+          "bbox": [
+            113.98,
+            130.61,
+            455.87,
+            151.48
+          ],
+          "type": "paragraph",
+          "text": "SAC agent(normal distributed action) train set:   138/9433(1.46%) train set:   3.17 test set:   16/1000(1.6%) test set:   2.91"
+        },
+        {
+          "block_id": "p6_b4",
+          "bbox": [
+            113.98,
+            152.33,
+            447.29,
+            173.3
+          ],
+          "type": "paragraph",
+          "text": "SAC agent(greedy action) train set:   226/9433(2.40%) train set:   1 test set:   22/1000(2.2%) test set:   1"
+        },
+        {
+          "block_id": "p6_b5",
+          "bbox": [
+            113.98,
+            174.15,
+            447.29,
+            195.11
+          ],
+          "type": "paragraph",
+          "text": "imitation learning agent train set:   196/9433(2.08%) train set:   1 test set:   21/1000(2.1%) test set:   1"
+        },
+        {
+          "block_id": "p6_b6",
+          "bbox": [
+            108.0,
+            219.01,
+            202.27,
+            232.06
+          ],
+          "type": "paragraph",
+          "text": "policy,   mostly  s \u0338   =   s ( i )"
+        },
+        {
+          "block_id": "p6_b7",
+          "bbox": [
+            193.22,
+            219.01,
+            445.24,
+            233.81
+          ],
+          "type": "paragraph",
+          "text": "0 (the case is not solved within one step.)   E.g.,   say  s   =   s ( i )"
+        },
+        {
+          "block_id": "p6_b8",
+          "bbox": [
+            106.83,
+            222.0,
+            504.0,
+            245.87
+          ],
+          "type": "paragraph",
+          "text": "5   ,   training with ( s ( i )"
+        },
+        {
+          "block_id": "p6_b9",
+          "bbox": [
+            115.38,
+            233.06,
+            454.9,
+            248.52
+          ],
+          "type": "paragraph",
+          "text": "5   , a ( i ) 5   ) , the agent is able to learn an  a ( i ) 0 which instantly solves this case in one step."
+        },
+        {
+          "block_id": "p6_b10",
+          "bbox": [
+            108.0,
+            261.32,
+            261.85,
+            271.29
+          ],
+          "type": "heading",
+          "text": "6.4 PCA analysis of the state space"
+        },
+        {
+          "block_id": "p6_b11",
+          "bbox": [
+            107.64,
+            281.64,
+            504.83,
+            357.13
+          ],
+          "type": "paragraph",
+          "text": "As   demonstrated   in   Figure   1,   and   in   Table   3,   there   are   a   small   number   of   extreme   cases   that   are unsolvable no matter what policy it is.   In order to have a deep understanding about the states of the   environment,   the   principle   component   analysis   (PCA)is   conducted   to   investigate   the   cluster distribution of unsolvable cases versus solvable cases in Euclidean space.   Speci\ufb01cally, for  \u2200 s   / \u2208 T , a random agent is initiated with allowable maximum steps as 1000 for multiple times.   If  s  can never be solved within 1000 steps during multiple trials,   we consider  s  as an \"unsolvable\" case (state); otherwise, it\u2019s a \"solvable\" case (state)."
+        },
+        {
+          "block_id": "p6_b12",
+          "bbox": [
+            107.69,
+            363.63,
+            504.0,
+            417.16
+          ],
+          "type": "paragraph",
+          "text": "The full state has a dimension of 1,442.   Figure 2(a) veri\ufb01es that the \ufb01rst two components can explain the majority of the variance in the data and Figure 2(b) shows there is a clear boundary between unsolvable cases and solvable cases.   This fact corresponds to the fact in complex power grid that there exists a small amount of extreme cases which can be proven unsolvable in the case of adjusting plant voltage setpoint only."
+        },
+        {
+          "block_id": "p6_b14",
+          "bbox": [
+            162.51,
+            558.72,
+            449.5,
+            568.68
+          ],
+          "type": "figure_caption",
+          "text": "Figure 2:   PCA results:   (a) Variations (b) Non-solvable v.s Solvable case"
+        },
+        {
+          "block_id": "p6_b15",
+          "bbox": [
+            108.0,
+            589.04,
+            183.07,
+            600.99
+          ],
+          "type": "heading",
+          "text": "7 Conclusion"
+        },
+        {
+          "block_id": "p6_b16",
+          "bbox": [
+            107.64,
+            614.19,
+            505.65,
+            722.41
+          ],
+          "type": "paragraph",
+          "text": "In   this   work,   we   revisited   the   previous   DRL-based   voltage   control   problem   of   power   grid.   We performed an in-depth analysis on algorithm selection, state space representation, and reward en- gineering.   Based upon the analysis result, we realize that the agent mostly learn lessons from the positive rewards of the last successful steps.   Thus, we optimize the reward design which results in a sample-ef\ufb01cient SAC-based approach that converges to the optimal policy very quickly.   Furthermore, we proposed a novel imitation learning-based approach to perform power grid voltage control.   The training and testing results show that the trained imitation learning agent has strong generalization ability which even outperforms the RL agent with the same policy network architecture.   Meanwhile, the imitation learning based method does not involve any complex hyper-parameter tuning or design of a reward function, and requires less training time to converge to the optimal policy."
+        },
+        {
+          "block_id": "p6_b17",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "6"
+        }
+      ]
+    },
+    {
+      "page_number": 7,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p7_b0",
+          "bbox": [
+            108.0,
+            72.79,
+            189.8,
+            84.74
+          ],
+          "type": "paragraph",
+          "text": "Broader Impact"
+        },
+        {
+          "block_id": "p7_b1",
+          "bbox": [
+            107.69,
+            110.58,
+            504.49,
+            262.43
+          ],
+          "type": "paragraph",
+          "text": "The   rapid   development   of   renewable   energy   brings   more   and   more   complexity   to   the   control   of power grid.   The traditional control methods based on operator\u2019s experience are dif\ufb01cult to cope with the complex and changeable power grid operating conditions (especially under unknown operating conditions).   How to effectively realize rapid regulation of power grid is an urgent problem to be solved.   With the fast development of AI technology, it is promising to provide operators with accurate and timely control plans, to improve the control ef\ufb01ciency during incidents.   This work provides an in-depth analysis on the DRL-based methodologies for autonomous voltage control for power grid operation.   Key aspects of MDP are thoroughly investigated for improving the performance of RL agents.   During this process, we found that such MDP formulation aims at obtaining one-step control to \ufb01x voltage violations once detected;   then we propose an imitation learning-based approach to achieve this goal, the effectiveness of which is veri\ufb01ed via massive simulation studies conducted on actual power grid operating conditions.   It is our hope that this work can help research community in better understanding the underlining principles of such control problems and promote AI-based solutions towards real-world implementation."
+        },
+        {
+          "block_id": "p7_b2",
+          "bbox": [
+            108.0,
+            301.13,
+            163.54,
+            313.08
+          ],
+          "type": "heading",
+          "text": "References"
+        },
+        {
+          "block_id": "p7_b3",
+          "bbox": [
+            108.0,
+            338.73,
+            504.0,
+            357.73
+          ],
+          "type": "paragraph",
+          "text": "[1] Q. Huang, R. Huang, W. Hao, J. Tan, R. Fan, and Z. Huang, \u201cAdaptive power system emergency control using deep reinforcement learning,\u201d  IEEE Trans.   Smart Grid , vol.   11, no.   22, pp.   1171-1182, 2020."
+        },
+        {
+          "block_id": "p7_b4",
+          "bbox": [
+            107.83,
+            364.14,
+            505.12,
+            393.09
+          ],
+          "type": "paragraph",
+          "text": "[2] Y. Ye, D. Qiu, X. Wu, G. Strbac and J. Ward, \"Model-Free real-time autonomous control for a residential multi-energy system using deep reinforcement learning,\"  IEEE Trans.   Smart Grid , vol.   11, no.   4, pp.   3068-3082, July 2020."
+        },
+        {
+          "block_id": "p7_b5",
+          "bbox": [
+            107.78,
+            399.63,
+            504.0,
+            418.5
+          ],
+          "type": "paragraph",
+          "text": "[3] T. Lan, J. Duan, B. Zhang, D. Shi, Z. Wang, R. Diao, and X. Zhang, \u201cAI-based autonomous line \ufb02ow control via topology adjustment for maximizing time-series ATCs,\u201d  https://arxiv.org/abs/1911.04263 , 2019."
+        },
+        {
+          "block_id": "p7_b6",
+          "bbox": [
+            108.0,
+            424.91,
+            504.0,
+            443.9
+          ],
+          "type": "paragraph",
+          "text": "[4] R. Diao, Z. Wang, D. Shi, etc., \u201cAutonomous voltage control for grid operation using deep reinforcement learning,\u201d  IEEE PES General Meeting , Atlanta, GA, USA, 2019."
+        },
+        {
+          "block_id": "p7_b7",
+          "bbox": [
+            108.0,
+            450.31,
+            505.59,
+            469.31
+          ],
+          "type": "paragraph",
+          "text": "[5] B. L. Thayer and T. J. Overbye, \u201cDeep reinforcement learning for electric transmission voltage control,\u201d arXiv preprint arXiv:2006.06728 , 2020."
+        },
+        {
+          "block_id": "p7_b8",
+          "bbox": [
+            107.85,
+            475.78,
+            504.0,
+            494.71
+          ],
+          "type": "paragraph",
+          "text": "[6] J. Duan et al., \"Deep reinforcement learning-based autonomous voltage control for power grid operations,\" IEEE Trans.   Power Systems , vol.   35, no.   1, pp.   814-817, Jan.   2020."
+        },
+        {
+          "block_id": "p7_b9",
+          "bbox": [
+            107.4,
+            501.18,
+            504.15,
+            530.08
+          ],
+          "type": "paragraph",
+          "text": "[7] C. Li, C. Jin, and R. K. Sharma, \u201cCoordination of pv smart inverters using deep reinforcement learning for grid voltage regulation,\u201d  2019 18th IEEE International Conference On Machine Learning And Applications (ICMLA) , pp.   1930\u20131937, 2019"
+        },
+        {
+          "block_id": "p7_b10",
+          "bbox": [
+            107.68,
+            536.57,
+            504.0,
+            555.49
+          ],
+          "type": "paragraph",
+          "text": "[8] R. S. Sutton, D. Mcallester, S. Singh, and Y. Mansour.   \"Policy gradient methods for reinforcement learning with function approximation.\" In  NIPS , pages 1057\u20131063.   MIT Press, 2000."
+        },
+        {
+          "block_id": "p7_b11",
+          "bbox": [
+            107.78,
+            561.89,
+            505.12,
+            590.85
+          ],
+          "type": "paragraph",
+          "text": "[9]   T.   Haarnoja,   A.   Zhou,   P.   Abbeel,   and   S.   Levine.   Soft   actor-critic:   Off-policy   maximum   entropy   deep reinforcement   learning   with   a   stochastic   actor.   In   International   Conference   on   Machine   Learning   (ICML) , volume 80, pages 1856\u20131865, 2018."
+        },
+        {
+          "block_id": "p7_b12",
+          "bbox": [
+            108.0,
+            597.17,
+            346.42,
+            606.3
+          ],
+          "type": "paragraph",
+          "text": "[10] G. Brockman et al., \"OpenAI Gym\",  arXiv:1606.01540 , 2016"
+        },
+        {
+          "block_id": "p7_b13",
+          "bbox": [
+            108.0,
+            612.84,
+            504.0,
+            631.7
+          ],
+          "type": "paragraph",
+          "text": "[11] Singh, Satinder, T. Jaakkola and Michael I. Jordan. \u201cLearning without state-estimation in partially observable markovian decision processes.\u201d  Proc.   ICML-94 , pp.   284-292."
+        },
+        {
+          "block_id": "p7_b14",
+          "bbox": [
+            108.0,
+            667.55,
+            161.51,
+            679.51
+          ],
+          "type": "paragraph",
+          "text": "Appendix:"
+        },
+        {
+          "block_id": "p7_b15",
+          "bbox": [
+            107.68,
+            703.31,
+            505.57,
+            722.17
+          ],
+          "type": "paragraph",
+          "text": "All code implementations are based on TensorFlow 2.3.0.   The SAC implementation is based on TF-Agents 0.6.0. The hyperparameters used for training are shown in Table 5 and 6."
+        },
+        {
+          "block_id": "p7_b16",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "7"
+        }
+      ]
+    },
+    {
+      "page_number": 8,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "block_id": "p8_b0",
+          "bbox": [
+            222.98,
+            71.2,
+            389.02,
+            81.16
+          ],
+          "type": "table_caption",
+          "text": "Table 4:   Variables and physical quantities"
+        },
+        {
+          "block_id": "p8_b1",
+          "bbox": [
+            184.74,
+            92.67,
+            427.27,
+            102.64
+          ],
+          "type": "paragraph",
+          "text": "Name Description Unit or value"
+        },
+        {
+          "block_id": "p8_b2",
+          "bbox": [
+            184.74,
+            108.56,
+            397.63,
+            184.82
+          ],
+          "type": "paragraph",
+          "text": "V m voltage magnitude p.u V a voltage angle p.u S line line \ufb02ow apparent power p.u P g active power of generator MW Q g reactive power of generator MVar n s state dimension 1442 n a action dimension(number of plants) 16"
+        },
+        {
+          "block_id": "p8_b3",
+          "bbox": [
+            195.21,
+            206.79,
+            416.79,
+            216.75
+          ],
+          "type": "table_caption",
+          "text": "Table 5:   Hyperparameters used for training SAC agents"
+        },
+        {
+          "block_id": "p8_b4",
+          "bbox": [
+            113.98,
+            228.26,
+            489.49,
+            238.22
+          ],
+          "type": "paragraph",
+          "text": "Hyperparameter Description Value"
+        },
+        {
+          "block_id": "p8_b5",
+          "bbox": [
+            113.98,
+            244.37,
+            508.31,
+            363.43
+          ],
+          "type": "paragraph",
+          "text": "critic_obs_fc fully connected layers for observation in critic network [512, 512] critic_action_fc fully connected layers for action in critic network [256] critic_joint_fc fully connected layers after merging observations and actions [256, 256] actor_fc fully connected layers for policy network [512, 512] batch_size batch size 256 episode_max_len horizon limit during training 50 lr learning rate 0.0003 \u03c4 target Factor for soft update of the target networks 0.005 target_update_period Period for soft update of the target networks 1 initial  log( \u03b1 ) initial value of  log( \u03b1 ) 1 collect_episodes number of episodes to collect per training step 1"
+        },
+        {
+          "block_id": "p8_b6",
+          "bbox": [
+            199.85,
+            390.99,
+            412.15,
+            400.95
+          ],
+          "type": "table_caption",
+          "text": "Table 6:   Hyperparameters used for imitation learning"
+        },
+        {
+          "block_id": "p8_b7",
+          "bbox": [
+            195.0,
+            412.46,
+            398.18,
+            422.43
+          ],
+          "type": "paragraph",
+          "text": "Hyperparameter Description Value"
+        },
+        {
+          "block_id": "p8_b8",
+          "bbox": [
+            195.0,
+            428.58,
+            417.0,
+            460.36
+          ],
+          "type": "paragraph",
+          "text": "hidden_fc_layers fully connected layers [512, 512] batch_size batch size 32 \u223c 512 lr learning rate 0.001"
+        },
+        {
+          "block_id": "p8_b9",
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "8"
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "section_id": "section_1",
+      "title": "Abstract",
+      "level": 1,
+      "page": 1,
+      "blocks": [
+        {
+          "block_id": "p1_b5",
+          "page": 1,
+          "bbox": [
+            143.56,
+            294.65,
+            469.88,
+            402.78
+          ],
+          "type": "paragraph",
+          "text": "Recently, deep reinforcement learning (DRL)-based approach has shown promise in solving complex decision and control problems in power engineering domain. In this paper, we present an in-depth analysis of DRL-based voltage control from aspects of algorithm selection, state space representation, and reward engineering. To resolve observed issues, we propose a novel imitation learning-based approach to directly map power grid operating points to effective actions without any interim reinforcement   learning   process.   The   performance   results   demonstrate   that   the proposed approach has strong generalization ability with much less training time. The   agent   trained   by   imitation   learning   is   effective   and   robust   to   solve   voltage control problem and outperforms the former RL agents."
+        }
+      ]
+    },
+    {
+      "section_id": "section_2",
+      "title": "1 Introduction",
+      "level": 1,
+      "page": 1,
+      "blocks": [
+        {
+          "block_id": "p1_b7",
+          "page": 1,
+          "bbox": [
+            107.64,
+            459.9,
+            505.25,
+            709.94
+          ],
+          "type": "paragraph",
+          "text": "Nowadays,   the   rapid   development   of   arti\ufb01cial   intelligence   (AI)   technologies   provides   new   ideas and   solutions   for   solving   many   challenges   in   the   \ufb01eld   of   power   grid   operation   and   control.   The application of deep reinforcement learning has been extensively explored to solve complex power engineering problems, such as grid emergency control [1], real-time autonomous energy management [2] and topology adjustment [3].   Speci\ufb01cally, DRL-based power grid control paradigm has become a hot spot and provides effective future development direction for both power system research and engineering community.   The pioneer work in [4] presents a novel autonomous control paradigm called \"Grid Mind\" to derive fast and effective controls in real time with Deep Q Network (DQN) agent to eliminate voltage violations.   Later on, the follow-up work in [5] expands the \ufb01ndings of [4] and modi\ufb01ed the DQN algorithm to improve control performance by avoiding the choice of same actions multiple times and normalizing the observations.   Similar ideas have been further expanded in [6] and [7] for controlling the voltage setpoint of generators and PV-converters in a continuous manner by employing Deep Deterministic Policy Gradient (DDPG) agent.   However, the previous work is mainly focused on demonstrating that the state-of-art DRL algorithm can be plugged in to the power grid control framework.   Different from the previous exploration, in this paper, we investigate the underlying nature of power grid voltage control and revisit it from the Markov Decision Process (MDP)   point   of   view,   mainly   focusing   on   tuning   the design   of   the   problem   formulation,   i.e.,   the choice of state representation, the DRL algorithm selection, and the reward engineering.   Moreover, we present the lessons learnt from training an effective DRL agent using the real world power grid data collected from the control center of SGCC Jiangsu Electric Power Company.   We further propose an imitation learning-based approach to resolve the voltage control problem based upon the \ufb01ndings of   the   training   process   and   demonstrate   that   the   imitation   learning   approach   is   also   an   effective alternative without any reinforcement learning component for this type of voltage control problem."
+        },
+        {
+          "block_id": "p1_b8",
+          "page": 1,
+          "bbox": [
+            107.58,
+            733.08,
+            460.04,
+            742.04
+          ],
+          "type": "paragraph",
+          "text": "Workshop on machine learning for engineering modeling, simulation and design @ NeurIPS 2020"
+        },
+        {
+          "block_id": "p1_b9",
+          "page": 1,
+          "bbox": [
+            10.94,
+            215.62,
+            37.62,
+            560.0
+          ],
+          "type": "paragraph",
+          "text": "arXiv:2012.13026v1  [cs.AI]  23 Dec 2020"
+        }
+      ]
+    },
+    {
+      "section_id": "section_3",
+      "title": "2 Problem formulation",
+      "level": 1,
+      "page": 2,
+      "blocks": [
+        {
+          "block_id": "p2_b1",
+          "page": 2,
+          "bbox": [
+            107.69,
+            97.8,
+            504.0,
+            140.56
+          ],
+          "type": "paragraph",
+          "text": "The main objective of power system voltage control is to maintain bus voltage pro\ufb01les within the prede\ufb01ned bounds and at the same time keeping transmission line \ufb02ows within limits.   The state is the current operating condition of the power grid represented by the power \ufb02ow snapshot at a given timestamp.   We model the power grid control problem as an MDP as follows:"
+        },
+        {
+          "block_id": "p2_b2",
+          "page": 2,
+          "bbox": [
+            135.4,
+            148.83,
+            504.0,
+            195.42
+          ],
+          "type": "paragraph",
+          "text": "\u2022   S :   an in\ufb01nite state space of continuous-valued state representation.   S   \u2208 R n s . Three types of measurement values can be adopted to construct state space:   bus values (bus voltage  V m   and bus angle  V a ), branch values (line \ufb02ow  S line ), and generator values (active power  P g   and reactive power  Q g )."
+        },
+        {
+          "block_id": "p2_b3",
+          "page": 2,
+          "bbox": [
+            135.4,
+            196.97,
+            505.75,
+            242.07
+          ],
+          "type": "paragraph",
+          "text": "\u2022   A :   an in\ufb01nite action space of continuous-valued action vector.   A  \u2208 R n a . The voltage setpoints of generators within each power plant are used to control bus voltages. Therefore n a   represents the number of power plants in the studied power grid.   The plant voltage value is bounded within the range of [0.9, 1.1] in p.u."
+        },
+        {
+          "block_id": "p2_b4",
+          "page": 2,
+          "bbox": [
+            135.4,
+            245.92,
+            504.0,
+            312.03
+          ],
+          "type": "paragraph",
+          "text": "\u2022   P :   a transition dynamics model that speci\ufb01es  P ( s \u2032 | s, a ) . In essence, the transition probability  P ( s \u2032 | s, a )  is determined and dominated by the physics laws and all con\ufb01gurations of its underlying environment.   In this design, we use an in-house power \ufb02ow solver (simulator) to model the transitions from state  s  to state  s \u2032   after applying action  a , i.e.,  P ( s \u2032 | s, a ) = 1  where  s \u2032   is obtained from the power \ufb02ow solver given the input s  and  a .   Thus,  P   is a sparse/one-hot matrix (of in\ufb01nite dimension) in our MDP."
+        },
+        {
+          "block_id": "p2_b5",
+          "page": 2,
+          "bbox": [
+            135.4,
+            317.25,
+            504.0,
+            350.53
+          ],
+          "type": "paragraph",
+          "text": "\u2022   R :   a reward function that maps a state action pair to a real number. Due   to   the   sparse   property   of   P   mentioned   above,   the   reward   at   time   step   t   can   also   be determined by the resulting state at time step  t  + 1 .   i.e.,  r t   =  R ( s t , a t ) =  R ( s t +1 ) ."
+        },
+        {
+          "block_id": "p2_b6",
+          "page": 2,
+          "bbox": [
+            135.4,
+            354.49,
+            389.62,
+            364.68
+          ],
+          "type": "paragraph",
+          "text": "\u2022   \u03b3 :   the discount factor.   It is \ufb01xed to 0.99 throughout the paper."
+        },
+        {
+          "block_id": "p2_b7",
+          "page": 2,
+          "bbox": [
+            107.75,
+            375.12,
+            505.25,
+            439.86
+          ],
+          "type": "paragraph",
+          "text": "Moreover, we de\ufb01ne a set of terminal states  T   which is composed of all the states without voltage violation for all buses and without line \ufb02ow violation for all lines.   A state  s  is \"unsuccessful\" iff s   / \u2208 T ,   meaning   that   there   exists   either   voltage   violations   or   line   \ufb02ow   violations   at   the   current operating condition.   Likewise, we de\ufb01ne any  s  \u2208 T   as a \"successful\" state.   The MDP is episodic by de\ufb01ning terminal states as above and enforcing a horizon limit for each episode (e.g., 50, 100, 1000, etc.)."
+        },
+        {
+          "block_id": "p2_b8",
+          "page": 2,
+          "bbox": [
+            107.64,
+            446.06,
+            504.67,
+            488.98
+          ],
+          "type": "paragraph",
+          "text": "In summary, the ultimate goal for the DRL agent is to \ufb01nd a policy  \u03c0  (a mapping from state to action) that can eliminate both voltage violations and line \ufb02ow violations as quickly as possible.   In other words, given an unsuccessful initial state, the policy is desired to be able to make effective sequence of decisions that leads to a successful state in as few number of steps as possible."
+        }
+      ]
+    },
+    {
+      "section_id": "section_4",
+      "title": "3 Data preparation",
+      "level": 1,
+      "page": 2,
+      "blocks": [
+        {
+          "block_id": "p2_b10",
+          "page": 2,
+          "bbox": [
+            107.53,
+            531.54,
+            505.24,
+            585.06
+          ],
+          "type": "paragraph",
+          "text": "We collected 10,433 power \ufb02ow snapshots from the control center of SGCC Jiangsu Power Company, which represents the power grid operating conditions from January to March, 2020.   The snapshots are stored in *.dat format, each of which can be treated as an unsuccessful initial state  s 0 .   To eliminate the seasonal impact of co-relation, the entire dataset is randomly split into 9,433 and 1,000 for training and testing, respectively, i.e.:"
+        },
+        {
+          "block_id": "p2_b11",
+          "page": 2,
+          "bbox": [
+            169.2,
+            593.08,
+            221.72,
+            607.38
+          ],
+          "type": "paragraph",
+          "text": "S train   =  { s (1)"
+        },
+        {
+          "block_id": "p2_b12",
+          "page": 2,
+          "bbox": [
+            211.53,
+            593.08,
+            357.21,
+            608.54
+          ],
+          "type": "paragraph",
+          "text": "0   , s (2) 0   , ..., s (9433) 0 } ;  S test   =  { s (9434)"
+        },
+        {
+          "block_id": "p2_b13",
+          "page": 2,
+          "bbox": [
+            335.09,
+            593.08,
+            388.92,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 , s (9435)"
+        },
+        {
+          "block_id": "p2_b14",
+          "page": 2,
+          "bbox": [
+            366.8,
+            593.08,
+            437.33,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 , ..., s (10433)"
+        },
+        {
+          "block_id": "p2_b15",
+          "page": 2,
+          "bbox": [
+            411.24,
+            595.79,
+            504.0,
+            607.89
+          ],
+          "type": "paragraph",
+          "text": "0 } (1)"
+        }
+      ]
+    },
+    {
+      "section_id": "section_5",
+      "title": "4 RL-based power grid voltage control",
+      "level": 1,
+      "page": 2,
+      "blocks": [],
+      "subsections": [
+        {
+          "section_id": "section_6",
+          "title": "4.1 Algorithm selection",
+          "level": 2,
+          "page": 2,
+          "blocks": [
+            {
+              "block_id": "p2_b18",
+              "page": 2,
+              "bbox": [
+                107.64,
+                668.82,
+                504.67,
+                722.42
+              ],
+              "type": "paragraph",
+              "text": "Both of value based RL algorithm (i.e., DQN) and policy gradient based RL algorithm (i.e., DDPG) have been studied in previous work to some extent.   But policy gradient RL algorithms tend to be more appropriate and effective in solving power grid control problem for the following reasons:   1) policy gradient based algorithms are proven to converge to at least local optimum (under certain conditions) whereas DQN does not have such guarantee mathematically [8]; 2) an ordinary DQN is dif\ufb01cult to"
+            },
+            {
+              "block_id": "p2_b19",
+              "page": 2,
+              "bbox": [
+                303.51,
+                742.33,
+                308.49,
+                752.3
+              ],
+              "type": "paragraph",
+              "text": "2"
+            },
+            {
+              "block_id": "p3_b0",
+              "page": 3,
+              "bbox": [
+                108.0,
+                74.42,
+                504.0,
+                117.1
+              ],
+              "type": "paragraph",
+              "text": "deal with in\ufb01nite continuous action space while both action space and state space of voltage control are continuous.   In this work, we consider soft actor critic (SAC) as our policy gradient RL algorithm instead of DDPG to enable more incentives for randomness in actions, which is important in \ufb01nding a good plant voltage point through exploration [9]."
+            }
+          ]
+        },
+        {
+          "section_id": "section_6",
+          "title": "4.2 Reward design strategies",
+          "level": 2,
+          "page": 3,
+          "blocks": [
+            {
+              "block_id": "p3_b2",
+              "page": 3,
+              "bbox": [
+                107.64,
+                154.65,
+                504.0,
+                219.39
+              ],
+              "type": "paragraph",
+              "text": "As mentioned before, the goal of training RL agents is to move from an unsuccessful state  s 0   to a successful state in as few steps as possible.   However, in SAC formulation, the agent is optimized directly upon the discounted sum of rewards instead of the number of steps per episode.   Therefore, a well-designed reward function plays a critical role in training an effective agent.   The agent must have the capability to learn lessons ef\ufb01ciently from the variation of the rewards to shorten its number of steps within an episode."
+            },
+            {
+              "block_id": "p3_b3",
+              "page": 3,
+              "bbox": [
+                108.0,
+                225.74,
+                504.35,
+                290.93
+              ],
+              "type": "paragraph",
+              "text": "Intuitively,   the   essence   of   the   policy   gradient   formula   is   to   increase   the   probability   of   taking   the actions   that   receive   large   rewards   and   decrease   the   probability   of   taking   the   actions   that   receive small rewards.   A good reward function design should be able to direct the policy network effectively through   rewards   and   penalties   (i.e.   small   positive   rewards   or   even   negative   rewards).   With   this assumption, we de\ufb01ne our reward function R by dividing it up into two separate functions  R \u2212 and R + , according to the types of a transition step (either successful or unsuccessful).   i.e.,"
+            },
+            {
+              "block_id": "p3_b4",
+              "page": 3,
+              "bbox": [
+                215.26,
+                308.11,
+                283.84,
+                319.56
+              ],
+              "type": "paragraph",
+              "text": "r t   =  R ( s t , a t ) ="
+            },
+            {
+              "block_id": "p3_b5",
+              "page": 3,
+              "bbox": [
+                286.6,
+                301.22,
+                504.0,
+                326.11
+              ],
+              "type": "paragraph",
+              "text": "\u001a R \u2212 ( s t +1 ) , if  s t +1   / \u2208 T R + ( s t +1 ) , if  s t +1   \u2208 T (2)"
+            },
+            {
+              "block_id": "p3_b6",
+              "page": 3,
+              "bbox": [
+                107.64,
+                341.24,
+                346.96,
+                351.21
+              ],
+              "type": "paragraph",
+              "text": "And we propose the following two reward design strategies:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "section_6",
+      "title": "1.   R \u2212 ( s ) =  f penalty ( V m , S line ) ; R + ( s )  is a \ufb01xed non-negative constant.",
+      "level": 1,
+      "page": 3,
+      "blocks": []
+    },
+    {
+      "section_id": "section_7",
+      "title": "2.   CartPole-style reward:   R  \u2261\u2212 1 .",
+      "level": 1,
+      "page": 3,
+      "blocks": [
+        {
+          "block_id": "p3_b9",
+          "page": 3,
+          "bbox": [
+            107.64,
+            411.46,
+            198.94,
+            428.89
+          ],
+          "type": "paragraph",
+          "text": "where   f penalty   =   \u03b1   P"
+        },
+        {
+          "block_id": "p3_b10",
+          "page": 3,
+          "bbox": [
+            198.94,
+            411.46,
+            300.15,
+            428.89
+          ],
+          "type": "paragraph",
+          "text": "i   line_over\ufb02ow [ i ]   +   \u03b2  P"
+        },
+        {
+          "block_id": "p3_b11",
+          "page": 3,
+          "bbox": [
+            108.0,
+            411.77,
+            504.0,
+            435.6
+          ],
+          "type": "paragraph",
+          "text": "j   bus_violation [ j ]   computes   the   penalty   (negative reward) of a given state according to its  S line   and  V m ."
+        },
+        {
+          "block_id": "p3_b12",
+          "page": 3,
+          "bbox": [
+            107.69,
+            440.3,
+            475.7,
+            450.5
+          ],
+          "type": "paragraph",
+          "text": "The over\ufb02ow of the  i th line and the voltage violation of the  j th bus are de\ufb01ned as following:"
+        },
+        {
+          "block_id": "p3_b13",
+          "page": 3,
+          "bbox": [
+            123.76,
+            459.36,
+            332.24,
+            471.95
+          ],
+          "type": "paragraph",
+          "text": "line_over\ufb02ow [ i ] = max { S line [ i ]  \u2212 line_limit [ i ] ,  0 } 2"
+        },
+        {
+          "block_id": "p3_b14",
+          "page": 3,
+          "bbox": [
+            123.76,
+            468.15,
+            504.0,
+            485.84
+          ],
+          "type": "paragraph",
+          "text": "bus_violation [ j ] = max { ( V m [ j ]  \u2212 bus_lower_limit [ j ])( V m [ j ]  \u2212 bus_upper_limit [ j ]) ,  0 } (3)"
+        },
+        {
+          "block_id": "p3_b15",
+          "page": 3,
+          "bbox": [
+            108.0,
+            495.3,
+            504.0,
+            516.41
+          ],
+          "type": "paragraph",
+          "text": "\u03b1  and  \u03b2   are used to balance the importance between line over\ufb02ow and bus voltage violation, which are set to  \u2212 0 . 1  and  \u2212 1000  respectively throughout this paper."
+        },
+        {
+          "block_id": "p3_b16",
+          "page": 3,
+          "bbox": [
+            107.64,
+            522.9,
+            505.74,
+            565.52
+          ],
+          "type": "paragraph",
+          "text": "Since the optimization objective is the average number of steps needed to solve an unsuccessful state, which   is   basically   the   length   of   the   episode,   we   attempt   to   make   the   agent   learn   directly   from   it. Hence, strategy 2 is proposed to make the length of an episode re\ufb02ected by the return value.   We call it \"CartPole-style\" reward since this is similar to the reward style of the CartPole environment [10]."
+        },
+        {
+          "block_id": "p3_b17",
+          "page": 3,
+          "bbox": [
+            108.0,
+            571.91,
+            504.35,
+            625.55
+          ],
+          "type": "paragraph",
+          "text": "It is the goal that under either of the two strategies above, the agent will converge to a theoretically optimal policy that solves all voltage violation cases in one step.   However, it is dif\ufb01cult to achieve in real world, because power grid is such a complex system that we are not able to theoretically ensure it is Markovian.   Meanwhile, for some voltage violation cases, there might not exist any one-step solution, given that we only enable control over plant voltage value settings."
+        },
+        {
+          "block_id": "p3_b18",
+          "page": 3,
+          "bbox": [
+            107.64,
+            632.05,
+            504.0,
+            652.84
+          ],
+          "type": "paragraph",
+          "text": "In the next section, we demonstrate the experiment results of different reward function designs, where we end up with a best reward design pattern and obtain some insights into power grid MDP."
+        }
+      ],
+      "subsections": [
+        {
+          "section_id": "section_8",
+          "title": "4.3 Experiments & analysis",
+          "level": 2,
+          "page": 3,
+          "blocks": [
+            {
+              "block_id": "p3_b20",
+              "page": 3,
+              "bbox": [
+                107.64,
+                690.4,
+                505.04,
+                723.67
+              ],
+              "type": "paragraph",
+              "text": "As shown in Table 1, we tried different values for  R +   for reward design strategy 1.   A higher  R + basically makes the training more ef\ufb01cient and converge to an optimal policy more quickly.   The SAC algorithm with  R +   = 0  fails to \ufb01nd an optimal policy."
+            },
+            {
+              "block_id": "p3_b21",
+              "page": 3,
+              "bbox": [
+                303.51,
+                742.33,
+                308.49,
+                752.3
+              ],
+              "type": "paragraph",
+              "text": "3"
+            },
+            {
+              "block_id": "p4_b0",
+              "page": 4,
+              "bbox": [
+                120.85,
+                71.02,
+                491.16,
+                82.71
+              ],
+              "type": "table_caption",
+              "text": "Table 1:   Training time needed til \ufb01nding the optimal policy under different  R +   for strategy 1"
+            },
+            {
+              "block_id": "p4_b1",
+              "page": 4,
+              "bbox": [
+                170.96,
+                88.82,
+                438.55,
+                110.45
+              ],
+              "type": "paragraph",
+              "text": "R + 0 1 10 \u223c 20 50 80 \u223c 1000 training steps fail to converge 3.4k 1.3k 1k 0.9k"
+            },
+            {
+              "block_id": "p4_b2",
+              "page": 4,
+              "bbox": [
+                108.0,
+                123.04,
+                505.75,
+                177.61
+              ],
+              "type": "paragraph",
+              "text": "For   strategy   2,   with   R   \u2261\u2212 1 ,   the   length   of   an   episode   is   directly   re\ufb02ected   by   its   sum   of   reward. However, it fails to converge to an optimal policy.   We then adjusted  R +   to 0 or 1, which is different from the original \"CartPole-style\" setting, since it is inappropriate to give the agent a penalty even on a successful step.   Unfortunately, the training diverges as well.   We \ufb01nally set a large value (1000) for R + , which eventually works well."
+            },
+            {
+              "block_id": "p4_b3",
+              "page": 4,
+              "bbox": [
+                120.85,
+                190.15,
+                491.16,
+                201.84
+              ],
+              "type": "table_caption",
+              "text": "Table 2:   Training time needed til \ufb01nding the optimal policy under different  R +   for strategy 2"
+            },
+            {
+              "block_id": "p4_b4",
+              "page": 4,
+              "bbox": [
+                151.63,
+                208.08,
+                457.88,
+                229.58
+              ],
+              "type": "paragraph",
+              "text": "R + -1 0 1 1000 training steps fail to converge fail to converge fail to converge 0.9k"
+            },
+            {
+              "block_id": "p4_b5",
+              "page": 4,
+              "bbox": [
+                108.0,
+                242.61,
+                505.24,
+                307.04
+              ],
+              "type": "paragraph",
+              "text": "From these experiments, we \ufb01nd out that a higher positive reward makes the agent learn lessons more quickly and ef\ufb01ciently.   As for the negative reward on any unsuccessful step, according to formula 3, the penalty increases quadratically as the line \ufb02ow or bus voltage goes beyond the limit, which is a common design in this \ufb01eld.   However, It turns out that a well-designed meaningful  R \u2212 does not play a such signi\ufb01cant role as  R + ; even with  R \u2212 as a constant, as long as  R +   is large enough, the agents can learn very well."
+            },
+            {
+              "block_id": "p4_b6",
+              "page": 4,
+              "bbox": [
+                107.69,
+                313.39,
+                504.0,
+                356.16
+              ],
+              "type": "paragraph",
+              "text": "These observations imply that the agent learns signi\ufb01cantly from the last successful steps.   Those unsuccessful steps give little helpful information to the RL agent.   It inspires us to train the agent with only successful steps and throw away all unsuccessful steps, which leads to the imitation learning based method that will be covered in the next section."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "section_8",
+      "title": "5 Imitation learning-based power grid control",
+      "level": 1,
+      "page": 4,
+      "blocks": [
+        {
+          "block_id": "p4_b8",
+          "page": 4,
+          "bbox": [
+            107.64,
+            408.78,
+            402.56,
+            418.83
+          ],
+          "type": "paragraph",
+          "text": "Algorithm 1  Imitation Learning for Training a Power Grid Control Agent"
+        },
+        {
+          "block_id": "p4_b9",
+          "page": 4,
+          "bbox": [
+            117.6,
+            425.14,
+            301.65,
+            489.88
+          ],
+          "type": "paragraph",
+          "text": "Initialize: policy   network   \u03c0   with   random weights  \u03b8 D  = COLLECT SUCCESSFUL STEPS( S train ) l objective = 1   #   set   an   objective   average episode\u2019s length to terminate the runtime. while  True  do"
+        },
+        {
+          "block_id": "p4_b10",
+          "page": 4,
+          "bbox": [
+            117.96,
+            490.6,
+            301.02,
+            511.7
+          ],
+          "type": "paragraph",
+          "text": "Train  \u03b8  with an optimizer (eg., Adam) on dataset  D  for an epoch"
+        },
+        {
+          "block_id": "p4_b11",
+          "page": 4,
+          "bbox": [
+            117.96,
+            512.42,
+            302.26,
+            534.13
+          ],
+          "type": "paragraph",
+          "text": "l  = EVALUATE EPISODE LENGTH( S test , \u03c0 \u03b8 )"
+        },
+        {
+          "block_id": "p4_b12",
+          "page": 4,
+          "bbox": [
+            132.91,
+            534.1,
+            208.0,
+            545.83
+          ],
+          "type": "paragraph",
+          "text": "if  l  \u2264 l objective   then"
+        },
+        {
+          "block_id": "p4_b13",
+          "page": 4,
+          "bbox": [
+            147.85,
+            545.28,
+            189.35,
+            555.25
+          ],
+          "type": "paragraph",
+          "text": "terminate"
+        },
+        {
+          "block_id": "p4_b14",
+          "page": 4,
+          "bbox": [
+            117.96,
+            567.08,
+            301.69,
+            577.25
+          ],
+          "type": "paragraph",
+          "text": "procedure  C OLLECT  S UCCESSFUL  S TEPS ( S )"
+        },
+        {
+          "block_id": "p4_b15",
+          "page": 4,
+          "bbox": [
+            117.63,
+            577.86,
+            301.37,
+            610.0
+          ],
+          "type": "paragraph",
+          "text": "Initialize  D   =  \u2205 Set policy  \u03c0 collect   to be an arbitrary policy (eg., random policy, trained SAC policy, etc.)"
+        },
+        {
+          "block_id": "p4_b16",
+          "page": 4,
+          "bbox": [
+            117.63,
+            610.72,
+            301.02,
+            631.82
+          ],
+          "type": "paragraph",
+          "text": "n  =  number of successful steps to collect (eg., 10000)"
+        },
+        {
+          "block_id": "p4_b17",
+          "page": 4,
+          "bbox": [
+            132.91,
+            632.54,
+            265.58,
+            653.55
+          ],
+          "type": "paragraph",
+          "text": "t limit   = 1000  # set a horizon limit while  | D |  < n  do"
+        },
+        {
+          "block_id": "p4_b18",
+          "page": 4,
+          "bbox": [
+            147.85,
+            654.35,
+            289.83,
+            676.59
+          ],
+          "type": "paragraph",
+          "text": "Randomly sample a state  s 0  from  S for  t  = 0 ,  1 ,  2 ..., t limit  \u2212 1  do"
+        },
+        {
+          "block_id": "p4_b19",
+          "page": 4,
+          "bbox": [
+            365.78,
+            425.14,
+            464.97,
+            458.29
+          ],
+          "type": "paragraph",
+          "text": "a t   =  \u03c0 collect ( s t ) s t +1  \u2190 perform  a t  on  s t if  s t +1   \u2208 T   then"
+        },
+        {
+          "block_id": "p4_b20",
+          "page": 4,
+          "bbox": [
+            335.89,
+            457.74,
+            461.21,
+            489.89
+          ],
+          "type": "paragraph",
+          "text": "D   =  D  \u222a{ ( s t , a t ) } break return  D"
+        },
+        {
+          "block_id": "p4_b21",
+          "page": 4,
+          "bbox": [
+            320.94,
+            501.73,
+            505.24,
+            522.83
+          ],
+          "type": "paragraph",
+          "text": "procedure  E VALUATE  E PISODE  L ENGTH ( S , \u03c0 )"
+        },
+        {
+          "block_id": "p4_b22",
+          "page": 4,
+          "bbox": [
+            320.94,
+            523.41,
+            504.0,
+            555.56
+          ],
+          "type": "paragraph",
+          "text": "Initialize  L  =  \u2205 n episodes = 50 # set number of episodes(cases) to evaluate"
+        },
+        {
+          "block_id": "p4_b23",
+          "page": 4,
+          "bbox": [
+            335.89,
+            556.27,
+            458.6,
+            578.78
+          ],
+          "type": "paragraph",
+          "text": "t limit   = 50  # set a horizon limit for  i  = 1 ,  2 , ..., n episodes  do"
+        },
+        {
+          "block_id": "p4_b24",
+          "page": 4,
+          "bbox": [
+            350.83,
+            578.09,
+            492.81,
+            600.33
+          ],
+          "type": "paragraph",
+          "text": "Randomly sample a state  s 0  from  S for  t  = 0 ,  1 ,  2 ..., t limit  \u2212 1  do"
+        },
+        {
+          "block_id": "p4_b25",
+          "page": 4,
+          "bbox": [
+            365.78,
+            599.91,
+            499.01,
+            633.32
+          ],
+          "type": "paragraph",
+          "text": "a t   =  \u03c0 ( s t ) s t +1  \u2190 perform  a t  on  s t if  s t +1   \u2208 T   or  t  + 1 =  t limit  then"
+        },
+        {
+          "block_id": "p4_b26",
+          "page": 4,
+          "bbox": [
+            335.89,
+            632.51,
+            449.35,
+            665.36
+          ],
+          "type": "paragraph",
+          "text": "L  =  L  \u222a{ t  + 1 } break return  E l \u2208 L [ l ]"
+        },
+        {
+          "block_id": "p4_b27",
+          "page": 4,
+          "bbox": [
+            108.0,
+            701.55,
+            504.0,
+            722.43
+          ],
+          "type": "paragraph",
+          "text": "Inspired by the study in Section 4.3, an imitation learning method is proposed to train an agent with only successful steps.   Speci\ufb01cally,   the proposed method does not incorporate any reinforcement"
+        },
+        {
+          "block_id": "p4_b28",
+          "page": 4,
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "4"
+        },
+        {
+          "block_id": "p5_b0",
+          "page": 5,
+          "bbox": [
+            107.69,
+            74.4,
+            505.74,
+            95.28
+          ],
+          "type": "paragraph",
+          "text": "learning component except a policy neural network mapping from a state vector to an action vector. The network is trained by supervised learning on a dataset  D :"
+        },
+        {
+          "block_id": "p5_b1",
+          "page": 5,
+          "bbox": [
+            241.93,
+            102.23,
+            504.0,
+            113.69
+          ],
+          "type": "paragraph",
+          "text": "D   =  { ( s t , a t ) | where  s t +1   \u2208 T } (4)"
+        }
+      ]
+    },
+    {
+      "section_id": "section_9",
+      "title": "6 Performance & analysis",
+      "level": 1,
+      "page": 5,
+      "blocks": [],
+      "subsections": [
+        {
+          "section_id": "section_10",
+          "title": "6.1 Random policy baseline performance",
+          "level": 2,
+          "page": 5,
+          "blocks": [
+            {
+              "block_id": "p5_b4",
+              "page": 5,
+              "bbox": [
+                107.64,
+                173.5,
+                504.35,
+                238.36
+              ],
+              "type": "paragraph",
+              "text": "For   each   s 0   \u2208 S train   \u222a S test ,   a   random   agent   is   employed   to   interact   with   the   environment.   The simulation is conducted multiple times (episodes) for each  s 0  and the average number of steps needed to solve each case are recorded.   The maximum episode length is 1000.   If a case can never be solved within 1000 steps, it is considered as an \"unsolvable\" case.   Figure 1(a) shows the random policy performance on the entire dataset of 10,433 cases.   There are totally 142/10433 (1.36%) unsolvable cases."
+            }
+          ]
+        },
+        {
+          "section_id": "section_10",
+          "title": "6.2 SAC agent performance",
+          "level": 2,
+          "page": 5,
+          "blocks": [
+            {
+              "block_id": "p5_b6",
+              "page": 5,
+              "bbox": [
+                107.69,
+                272.49,
+                504.75,
+                413.6
+              ],
+              "type": "paragraph",
+              "text": "The SAC agent was trained with  R +   = 1000 .   The evaluation result of the agent is shown in Figure 1 and Table 3.   We evaulated the agent\u2019s policy with its stochastic (i.e., the action is sampled from a normal distribution given its learned mean and standard deviation) and greedy (i.e., the action is solely determined by its mean, which means a deterministic policy) variants respectively.   The greedy SAC policy is able to solve all cases in only one step; but there exist more unsolvable cases, compared with random policy.   The stochastic SAC policy, on the other hand, has a higher solvable rate (98.5% on train set and 98.4% on test set) but needs more steps on average to solve a voltage violation case.   One reason is that the state representation is still possibly not a Markovian representation (considering the complexity of power grid system), and adding randomness can alleviate the partial observability problem [11].   This is why a policy with distributed action or a random policy is able to solve more cases (regardless of steps cost) than a deterministic policy.   Despite the advantage of stochasticity, the deterministic policy is superior in that it solves a case instantly (one step).   In practice, it relies on the grid operators\u2019 engineering judgement to decide which policy is better."
+            },
+            {
+              "block_id": "p5_b8",
+              "page": 5,
+              "bbox": [
+                108.0,
+                543.31,
+                504.34,
+                564.26
+              ],
+              "type": "figure_caption",
+              "text": "Figure   1:   Policy   performance   comparison.   (Case   indices   are   sorted   according   to   random   policy performance.   A case is considered unsolvable if its y value reaches  10 3 .)"
+            }
+          ]
+        },
+        {
+          "section_id": "section_10",
+          "title": "6.3 Imitation learning agent performance",
+          "level": 2,
+          "page": 5,
+          "blocks": [
+            {
+              "block_id": "p5_b10",
+              "page": 5,
+              "bbox": [
+                107.25,
+                600.01,
+                505.24,
+                722.43
+              ],
+              "type": "paragraph",
+              "text": "A dataset  D  is collected according to Algorithm 1 by running random policy, which contains  \u223c 20k successful   transitions   corresponding   to   S train .   In   other   words,   any   of   the   successful   transition   is generated within an episode starting with a certain initial state in  S train .   Note that there might be multiple transitions in  D  corresponding to the same  s 0   in  S train .   The network architecture is the same as the policy network of the former SAC agent (see Appendix).   The training takes only three epochs until \ufb01nding the optimal policy, which is much faster than the SAC algorithm.   As shown in Figure 1 and Table 3, the imitation learning agent performs even better than the SAC agent with a higher solvable rate.   It can solve any solvable case in one step.   The strong generalization ability of the imitation learning agent can be viewed in two aspects:   1)  D  was collected by exploring cases in  S train , and the agent is able to solve most cases in  S test   in one step;   2) consider  ( s, a )   \u2208 D   which is the successful step of an episode starting with  s ( i )"
+            },
+            {
+              "block_id": "p5_b11",
+              "page": 5,
+              "bbox": [
+                285.14,
+                712.08,
+                504.0,
+                724.18
+              ],
+              "type": "paragraph",
+              "text": "0 \u2208 S test , since  D  was collected by running a random"
+            },
+            {
+              "block_id": "p5_b12",
+              "page": 5,
+              "bbox": [
+                303.51,
+                742.33,
+                308.49,
+                752.3
+              ],
+              "type": "paragraph",
+              "text": "5"
+            },
+            {
+              "block_id": "p6_b0",
+              "page": 6,
+              "bbox": [
+                235.07,
+                71.2,
+                376.93,
+                81.16
+              ],
+              "type": "table_caption",
+              "text": "Table 3:   Policy performance details"
+            },
+            {
+              "block_id": "p6_b1",
+              "page": 6,
+              "bbox": [
+                113.98,
+                92.67,
+                499.76,
+                102.64
+              ],
+              "type": "paragraph",
+              "text": "Policy Number of unsolvable cases Avg steps to solve a case"
+            },
+            {
+              "block_id": "p6_b2",
+              "page": 6,
+              "bbox": [
+                113.98,
+                108.7,
+                460.85,
+                129.66
+              ],
+              "type": "paragraph",
+              "text": "random policy train set:   127/9433(1.35%) train set:   11.53 test set:   13/1000(1.3%) test set:   11.98"
+            },
+            {
+              "block_id": "p6_b3",
+              "page": 6,
+              "bbox": [
+                113.98,
+                130.61,
+                455.87,
+                151.48
+              ],
+              "type": "paragraph",
+              "text": "SAC agent(normal distributed action) train set:   138/9433(1.46%) train set:   3.17 test set:   16/1000(1.6%) test set:   2.91"
+            },
+            {
+              "block_id": "p6_b4",
+              "page": 6,
+              "bbox": [
+                113.98,
+                152.33,
+                447.29,
+                173.3
+              ],
+              "type": "paragraph",
+              "text": "SAC agent(greedy action) train set:   226/9433(2.40%) train set:   1 test set:   22/1000(2.2%) test set:   1"
+            },
+            {
+              "block_id": "p6_b5",
+              "page": 6,
+              "bbox": [
+                113.98,
+                174.15,
+                447.29,
+                195.11
+              ],
+              "type": "paragraph",
+              "text": "imitation learning agent train set:   196/9433(2.08%) train set:   1 test set:   21/1000(2.1%) test set:   1"
+            },
+            {
+              "block_id": "p6_b6",
+              "page": 6,
+              "bbox": [
+                108.0,
+                219.01,
+                202.27,
+                232.06
+              ],
+              "type": "paragraph",
+              "text": "policy,   mostly  s \u0338   =   s ( i )"
+            },
+            {
+              "block_id": "p6_b7",
+              "page": 6,
+              "bbox": [
+                193.22,
+                219.01,
+                445.24,
+                233.81
+              ],
+              "type": "paragraph",
+              "text": "0 (the case is not solved within one step.)   E.g.,   say  s   =   s ( i )"
+            },
+            {
+              "block_id": "p6_b8",
+              "page": 6,
+              "bbox": [
+                106.83,
+                222.0,
+                504.0,
+                245.87
+              ],
+              "type": "paragraph",
+              "text": "5   ,   training with ( s ( i )"
+            },
+            {
+              "block_id": "p6_b9",
+              "page": 6,
+              "bbox": [
+                115.38,
+                233.06,
+                454.9,
+                248.52
+              ],
+              "type": "paragraph",
+              "text": "5   , a ( i ) 5   ) , the agent is able to learn an  a ( i ) 0 which instantly solves this case in one step."
+            }
+          ]
+        },
+        {
+          "section_id": "section_10",
+          "title": "6.4 PCA analysis of the state space",
+          "level": 2,
+          "page": 6,
+          "blocks": [
+            {
+              "block_id": "p6_b11",
+              "page": 6,
+              "bbox": [
+                107.64,
+                281.64,
+                504.83,
+                357.13
+              ],
+              "type": "paragraph",
+              "text": "As   demonstrated   in   Figure   1,   and   in   Table   3,   there   are   a   small   number   of   extreme   cases   that   are unsolvable no matter what policy it is.   In order to have a deep understanding about the states of the   environment,   the   principle   component   analysis   (PCA)is   conducted   to   investigate   the   cluster distribution of unsolvable cases versus solvable cases in Euclidean space.   Speci\ufb01cally, for  \u2200 s   / \u2208 T , a random agent is initiated with allowable maximum steps as 1000 for multiple times.   If  s  can never be solved within 1000 steps during multiple trials,   we consider  s  as an \"unsolvable\" case (state); otherwise, it\u2019s a \"solvable\" case (state)."
+            },
+            {
+              "block_id": "p6_b12",
+              "page": 6,
+              "bbox": [
+                107.69,
+                363.63,
+                504.0,
+                417.16
+              ],
+              "type": "paragraph",
+              "text": "The full state has a dimension of 1,442.   Figure 2(a) veri\ufb01es that the \ufb01rst two components can explain the majority of the variance in the data and Figure 2(b) shows there is a clear boundary between unsolvable cases and solvable cases.   This fact corresponds to the fact in complex power grid that there exists a small amount of extreme cases which can be proven unsolvable in the case of adjusting plant voltage setpoint only."
+            },
+            {
+              "block_id": "p6_b14",
+              "page": 6,
+              "bbox": [
+                162.51,
+                558.72,
+                449.5,
+                568.68
+              ],
+              "type": "figure_caption",
+              "text": "Figure 2:   PCA results:   (a) Variations (b) Non-solvable v.s Solvable case"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "section_10",
+      "title": "7 Conclusion",
+      "level": 1,
+      "page": 6,
+      "blocks": [
+        {
+          "block_id": "p6_b16",
+          "page": 6,
+          "bbox": [
+            107.64,
+            614.19,
+            505.65,
+            722.41
+          ],
+          "type": "paragraph",
+          "text": "In   this   work,   we   revisited   the   previous   DRL-based   voltage   control   problem   of   power   grid.   We performed an in-depth analysis on algorithm selection, state space representation, and reward en- gineering.   Based upon the analysis result, we realize that the agent mostly learn lessons from the positive rewards of the last successful steps.   Thus, we optimize the reward design which results in a sample-ef\ufb01cient SAC-based approach that converges to the optimal policy very quickly.   Furthermore, we proposed a novel imitation learning-based approach to perform power grid voltage control.   The training and testing results show that the trained imitation learning agent has strong generalization ability which even outperforms the RL agent with the same policy network architecture.   Meanwhile, the imitation learning based method does not involve any complex hyper-parameter tuning or design of a reward function, and requires less training time to converge to the optimal policy."
+        },
+        {
+          "block_id": "p6_b17",
+          "page": 6,
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "6"
+        },
+        {
+          "block_id": "p7_b0",
+          "page": 7,
+          "bbox": [
+            108.0,
+            72.79,
+            189.8,
+            84.74
+          ],
+          "type": "paragraph",
+          "text": "Broader Impact"
+        },
+        {
+          "block_id": "p7_b1",
+          "page": 7,
+          "bbox": [
+            107.69,
+            110.58,
+            504.49,
+            262.43
+          ],
+          "type": "paragraph",
+          "text": "The   rapid   development   of   renewable   energy   brings   more   and   more   complexity   to   the   control   of power grid.   The traditional control methods based on operator\u2019s experience are dif\ufb01cult to cope with the complex and changeable power grid operating conditions (especially under unknown operating conditions).   How to effectively realize rapid regulation of power grid is an urgent problem to be solved.   With the fast development of AI technology, it is promising to provide operators with accurate and timely control plans, to improve the control ef\ufb01ciency during incidents.   This work provides an in-depth analysis on the DRL-based methodologies for autonomous voltage control for power grid operation.   Key aspects of MDP are thoroughly investigated for improving the performance of RL agents.   During this process, we found that such MDP formulation aims at obtaining one-step control to \ufb01x voltage violations once detected;   then we propose an imitation learning-based approach to achieve this goal, the effectiveness of which is veri\ufb01ed via massive simulation studies conducted on actual power grid operating conditions.   It is our hope that this work can help research community in better understanding the underlining principles of such control problems and promote AI-based solutions towards real-world implementation."
+        }
+      ]
+    },
+    {
+      "section_id": "section_11",
+      "title": "References",
+      "level": 1,
+      "page": 7,
+      "blocks": [
+        {
+          "block_id": "p7_b3",
+          "page": 7,
+          "bbox": [
+            108.0,
+            338.73,
+            504.0,
+            357.73
+          ],
+          "type": "paragraph",
+          "text": "[1] Q. Huang, R. Huang, W. Hao, J. Tan, R. Fan, and Z. Huang, \u201cAdaptive power system emergency control using deep reinforcement learning,\u201d  IEEE Trans.   Smart Grid , vol.   11, no.   22, pp.   1171-1182, 2020."
+        },
+        {
+          "block_id": "p7_b4",
+          "page": 7,
+          "bbox": [
+            107.83,
+            364.14,
+            505.12,
+            393.09
+          ],
+          "type": "paragraph",
+          "text": "[2] Y. Ye, D. Qiu, X. Wu, G. Strbac and J. Ward, \"Model-Free real-time autonomous control for a residential multi-energy system using deep reinforcement learning,\"  IEEE Trans.   Smart Grid , vol.   11, no.   4, pp.   3068-3082, July 2020."
+        },
+        {
+          "block_id": "p7_b5",
+          "page": 7,
+          "bbox": [
+            107.78,
+            399.63,
+            504.0,
+            418.5
+          ],
+          "type": "paragraph",
+          "text": "[3] T. Lan, J. Duan, B. Zhang, D. Shi, Z. Wang, R. Diao, and X. Zhang, \u201cAI-based autonomous line \ufb02ow control via topology adjustment for maximizing time-series ATCs,\u201d  https://arxiv.org/abs/1911.04263 , 2019."
+        },
+        {
+          "block_id": "p7_b6",
+          "page": 7,
+          "bbox": [
+            108.0,
+            424.91,
+            504.0,
+            443.9
+          ],
+          "type": "paragraph",
+          "text": "[4] R. Diao, Z. Wang, D. Shi, etc., \u201cAutonomous voltage control for grid operation using deep reinforcement learning,\u201d  IEEE PES General Meeting , Atlanta, GA, USA, 2019."
+        },
+        {
+          "block_id": "p7_b7",
+          "page": 7,
+          "bbox": [
+            108.0,
+            450.31,
+            505.59,
+            469.31
+          ],
+          "type": "paragraph",
+          "text": "[5] B. L. Thayer and T. J. Overbye, \u201cDeep reinforcement learning for electric transmission voltage control,\u201d arXiv preprint arXiv:2006.06728 , 2020."
+        },
+        {
+          "block_id": "p7_b8",
+          "page": 7,
+          "bbox": [
+            107.85,
+            475.78,
+            504.0,
+            494.71
+          ],
+          "type": "paragraph",
+          "text": "[6] J. Duan et al., \"Deep reinforcement learning-based autonomous voltage control for power grid operations,\" IEEE Trans.   Power Systems , vol.   35, no.   1, pp.   814-817, Jan.   2020."
+        },
+        {
+          "block_id": "p7_b9",
+          "page": 7,
+          "bbox": [
+            107.4,
+            501.18,
+            504.15,
+            530.08
+          ],
+          "type": "paragraph",
+          "text": "[7] C. Li, C. Jin, and R. K. Sharma, \u201cCoordination of pv smart inverters using deep reinforcement learning for grid voltage regulation,\u201d  2019 18th IEEE International Conference On Machine Learning And Applications (ICMLA) , pp.   1930\u20131937, 2019"
+        },
+        {
+          "block_id": "p7_b10",
+          "page": 7,
+          "bbox": [
+            107.68,
+            536.57,
+            504.0,
+            555.49
+          ],
+          "type": "paragraph",
+          "text": "[8] R. S. Sutton, D. Mcallester, S. Singh, and Y. Mansour.   \"Policy gradient methods for reinforcement learning with function approximation.\" In  NIPS , pages 1057\u20131063.   MIT Press, 2000."
+        },
+        {
+          "block_id": "p7_b11",
+          "page": 7,
+          "bbox": [
+            107.78,
+            561.89,
+            505.12,
+            590.85
+          ],
+          "type": "paragraph",
+          "text": "[9]   T.   Haarnoja,   A.   Zhou,   P.   Abbeel,   and   S.   Levine.   Soft   actor-critic:   Off-policy   maximum   entropy   deep reinforcement   learning   with   a   stochastic   actor.   In   International   Conference   on   Machine   Learning   (ICML) , volume 80, pages 1856\u20131865, 2018."
+        },
+        {
+          "block_id": "p7_b12",
+          "page": 7,
+          "bbox": [
+            108.0,
+            597.17,
+            346.42,
+            606.3
+          ],
+          "type": "paragraph",
+          "text": "[10] G. Brockman et al., \"OpenAI Gym\",  arXiv:1606.01540 , 2016"
+        },
+        {
+          "block_id": "p7_b13",
+          "page": 7,
+          "bbox": [
+            108.0,
+            612.84,
+            504.0,
+            631.7
+          ],
+          "type": "paragraph",
+          "text": "[11] Singh, Satinder, T. Jaakkola and Michael I. Jordan. \u201cLearning without state-estimation in partially observable markovian decision processes.\u201d  Proc.   ICML-94 , pp.   284-292."
+        },
+        {
+          "block_id": "p7_b14",
+          "page": 7,
+          "bbox": [
+            108.0,
+            667.55,
+            161.51,
+            679.51
+          ],
+          "type": "paragraph",
+          "text": "Appendix:"
+        },
+        {
+          "block_id": "p7_b15",
+          "page": 7,
+          "bbox": [
+            107.68,
+            703.31,
+            505.57,
+            722.17
+          ],
+          "type": "paragraph",
+          "text": "All code implementations are based on TensorFlow 2.3.0.   The SAC implementation is based on TF-Agents 0.6.0. The hyperparameters used for training are shown in Table 5 and 6."
+        },
+        {
+          "block_id": "p7_b16",
+          "page": 7,
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "7"
+        },
+        {
+          "block_id": "p8_b0",
+          "page": 8,
+          "bbox": [
+            222.98,
+            71.2,
+            389.02,
+            81.16
+          ],
+          "type": "table_caption",
+          "text": "Table 4:   Variables and physical quantities"
+        },
+        {
+          "block_id": "p8_b1",
+          "page": 8,
+          "bbox": [
+            184.74,
+            92.67,
+            427.27,
+            102.64
+          ],
+          "type": "paragraph",
+          "text": "Name Description Unit or value"
+        },
+        {
+          "block_id": "p8_b2",
+          "page": 8,
+          "bbox": [
+            184.74,
+            108.56,
+            397.63,
+            184.82
+          ],
+          "type": "paragraph",
+          "text": "V m voltage magnitude p.u V a voltage angle p.u S line line \ufb02ow apparent power p.u P g active power of generator MW Q g reactive power of generator MVar n s state dimension 1442 n a action dimension(number of plants) 16"
+        },
+        {
+          "block_id": "p8_b3",
+          "page": 8,
+          "bbox": [
+            195.21,
+            206.79,
+            416.79,
+            216.75
+          ],
+          "type": "table_caption",
+          "text": "Table 5:   Hyperparameters used for training SAC agents"
+        },
+        {
+          "block_id": "p8_b4",
+          "page": 8,
+          "bbox": [
+            113.98,
+            228.26,
+            489.49,
+            238.22
+          ],
+          "type": "paragraph",
+          "text": "Hyperparameter Description Value"
+        },
+        {
+          "block_id": "p8_b5",
+          "page": 8,
+          "bbox": [
+            113.98,
+            244.37,
+            508.31,
+            363.43
+          ],
+          "type": "paragraph",
+          "text": "critic_obs_fc fully connected layers for observation in critic network [512, 512] critic_action_fc fully connected layers for action in critic network [256] critic_joint_fc fully connected layers after merging observations and actions [256, 256] actor_fc fully connected layers for policy network [512, 512] batch_size batch size 256 episode_max_len horizon limit during training 50 lr learning rate 0.0003 \u03c4 target Factor for soft update of the target networks 0.005 target_update_period Period for soft update of the target networks 1 initial  log( \u03b1 ) initial value of  log( \u03b1 ) 1 collect_episodes number of episodes to collect per training step 1"
+        },
+        {
+          "block_id": "p8_b6",
+          "page": 8,
+          "bbox": [
+            199.85,
+            390.99,
+            412.15,
+            400.95
+          ],
+          "type": "table_caption",
+          "text": "Table 6:   Hyperparameters used for imitation learning"
+        },
+        {
+          "block_id": "p8_b7",
+          "page": 8,
+          "bbox": [
+            195.0,
+            412.46,
+            398.18,
+            422.43
+          ],
+          "type": "paragraph",
+          "text": "Hyperparameter Description Value"
+        },
+        {
+          "block_id": "p8_b8",
+          "page": 8,
+          "bbox": [
+            195.0,
+            428.58,
+            417.0,
+            460.36
+          ],
+          "type": "paragraph",
+          "text": "hidden_fc_layers fully connected layers [512, 512] batch_size batch size 32 \u223c 512 lr learning rate 0.001"
+        },
+        {
+          "block_id": "p8_b9",
+          "page": 8,
+          "bbox": [
+            303.51,
+            742.33,
+            308.49,
+            752.3
+          ],
+          "type": "paragraph",
+          "text": "8"
+        }
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "figure_id": "fig_p5_0",
+      "page": 5,
+      "image_path": "data/processed\\2012.13026v1\\figures\\fig_p5_0.png",
+      "bbox": [
+        112.155,
+        426.67,
+        499.025,
+        531.49
+      ],
+      "caption": "Figure 1: Policy performance comparison. (Case indices are sorted according to random policy performance. A case is considered unsolvable if its y value reaches 103.)",
+      "caption_bbox": [
+        108.0,
+        543.312255859375,
+        504.343017578125,
+        564.259033203125
+      ],
+      "detection_confidence": 0.8928
+    },
+    {
+      "figure_id": "fig_p6_0",
+      "page": 6,
+      "image_path": "data/processed\\2012.13026v1\\figures\\fig_p6_0.png",
+      "bbox": [
+        178.625,
+        430.4200000000001,
+        432.51,
+        547.19
+      ],
+      "caption": "Figure 2: PCA results: (a) Variations (b) Non-solvable v.s Solvable case",
+      "caption_bbox": [
+        162.5050048828125,
+        558.7184448242188,
+        449.49761962890625,
+        568.6810302734375
+      ],
+      "detection_confidence": 0.904
+    }
+  ],
+  "tables": [
+    {
+      "table_id": "table_p4_1",
+      "page": 4,
+      "bbox": [
+        104.28740234375,
+        407.05040978952155,
+        508.6828515625,
+        679.8203533133328
+      ],
+      "caption": null,
+      "caption_bbox": null,
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p4_1.txt",
+      "data": [
+        [
+          "Algorithm 1 Imitation Learning for Training a Power Grid Control Agent",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Initialize:",
+          "policy network \u03c0 with random",
+          "a t = \u03c0 collect (s t )",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "weights \u03b8",
+          "s t+1 \u2190 perform a t on s t",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "D = COLLECT SUCCESSFUL STEPS(S train )",
+          "if s t+1 \u2208 T then",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "l objective",
+          "=",
+          "1 # set an objective average",
+          "D = D \u222a {(s t ,a t )}",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "episode\u2019s length to terminate the runtime.",
+          "break",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "while True do",
+          "return D",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Train \u03b8 with an optimizer (eg., Adam) on",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "dataset D for an epoch",
+          "procedure EVALUATE EPISODE LENGTH(S,",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "l = EVALUATE EPISODE LENGTH(S test ,",
+          "\u03c0)",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "\u03c0 \u03b8 )",
+          "Initialize L = \u2205",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "if l \u2264 l objective then",
+          "n episodes",
+          "=",
+          "50",
+          "#",
+          "set",
+          "number",
+          "of"
+        ],
+        [
+          "terminate",
+          "episodes(cases) to evaluate",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "t limit = 50 # set a horizon limit",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "procedure COLLECT SUCCESSFUL STEPS(S)",
+          "for i = 1,2,...,n episodes do",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Initialize D = \u2205",
+          "Randomly sample a state s 0 from S",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Set policy \u03c0 collect to be an arbitrary policy",
+          "for t = 0,1,2...,t limit \u2212 1 do",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "(eg., random policy, trained SAC policy, etc.)",
+          "a t = \u03c0(s t )",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "n = number of successful steps to collect",
+          "s t+1 \u2190 perform a t on s t",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "(eg., 10000)",
+          "if s t+1 \u2208 T or t + 1 = t limit then",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "t limit = 1000 # set a horizon limit",
+          "L = L \u222a {t + 1}",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "while |D| < n do",
+          "break",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Randomly sample a state s 0 from S",
+          "return E l\u2208L [l]",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "for t = 0,1,2...,t limit \u2212 1 do",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "detection_confidence": 0.9985
+    },
+    {
+      "table_id": "table_p6_1",
+      "page": 6,
+      "bbox": [
+        108.5656982421875,
+        87.70547805129941,
+        502.24421874999996,
+        199.15889961339718
+      ],
+      "caption": "Table 3: Policy performance details",
+      "caption_bbox": [
+        235.067,
+        70.94432159999997,
+        376.93442400000004,
+        80.90692160000003
+      ],
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p6_1.txt",
+      "data": [
+        [
+          "Policy",
+          "Number of unsolvable cases",
+          "Avg steps to solve a case"
+        ],
+        [
+          "train set: 127/9433(1.35%)",
+          "train set: 11.53",
+          ""
+        ],
+        [
+          "random policy",
+          "",
+          ""
+        ],
+        [
+          "test set: 13/1000(1.3%)",
+          "test set: 11.98",
+          ""
+        ],
+        [
+          "train set: 138/9433(1.46%)",
+          "train set: 3.17",
+          ""
+        ],
+        [
+          "SAC agent(normal distributed action)",
+          "",
+          ""
+        ],
+        [
+          "test set: 16/1000(1.6%)",
+          "test set: 2.91",
+          ""
+        ],
+        [
+          "train set: 226/9433(2.40%)",
+          "train set: 1",
+          ""
+        ],
+        [
+          "SAC agent(greedy action)",
+          "",
+          ""
+        ],
+        [
+          "test set: 22/1000(2.2%)",
+          "test set: 1",
+          ""
+        ],
+        [
+          "train set: 196/9433(2.08%)",
+          "train set: 1",
+          ""
+        ],
+        [
+          "imitation learning agent",
+          "",
+          ""
+        ],
+        [
+          "test set: 21/1000(2.1%)",
+          "test set: 1",
+          ""
+        ]
+      ],
+      "detection_confidence": 0.9998
+    },
+    {
+      "table_id": "table_p7_1",
+      "page": 7,
+      "bbox": [
+        102.97224365234375,
+        463.924036627896,
+        507.542734375,
+        721.2035343163235
+      ],
+      "caption": null,
+      "caption_bbox": null,
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p7_1.txt",
+      "data": [
+        [
+          "arXiv preprint arXiv:2006.06728, 2020."
+        ],
+        [
+          "[6] J. Duan et al., \"Deep reinforcement learning-based autonomous voltage control for power grid operations,\""
+        ],
+        [
+          "IEEE Trans. Power Systems, vol. 35, no. 1, pp. 814-817, Jan. 2020."
+        ],
+        [
+          "[7] C. Li, C. Jin, and R. K. Sharma, \u201cCoordination of pv smart inverters using deep reinforcement learning for"
+        ],
+        [
+          "grid voltage regulation,\u201d 2019 18th IEEE International Conference On Machine Learning And Applications"
+        ],
+        [
+          "(ICMLA), pp. 1930\u20131937, 2019"
+        ],
+        [
+          "[8] R. S. Sutton, D. Mcallester, S. Singh, and Y. Mansour. \"Policy gradient methods for reinforcement learning"
+        ],
+        [
+          "with function approximation.\" In NIPS, pages 1057\u20131063. MIT Press, 2000."
+        ],
+        [
+          "[9] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine. Soft actor-critic: Off-policy maximum entropy deep"
+        ],
+        [
+          "reinforcement learning with a stochastic actor. In International Conference on Machine Learning (ICML),"
+        ],
+        [
+          "volume 80, pages 1856\u20131865, 2018."
+        ],
+        [
+          "[10] G. Brockman et al., \"OpenAI Gym\", arXiv:1606.01540, 2016"
+        ],
+        [
+          "[11]Singh,Satinder,T.JaakkolaandMichaelI.Jordan. \u201cLearningwithoutstate-estimationinpartiallyobservable"
+        ],
+        [
+          "markovian decision processes.\u201d Proc. ICML-94, pp. 284-292."
+        ],
+        [
+          "Appendix:"
+        ],
+        [
+          "All code implementations are based on TensorFlow 2.3.0. The SAC implementation is based on TF-Agents 0.6.0."
+        ],
+        [
+          "The hyperparameters used for training are shown in Table 5 and 6."
+        ]
+      ],
+      "detection_confidence": 0.6721
+    },
+    {
+      "table_id": "table_p8_1",
+      "page": 8,
+      "bbox": [
+        182.61609863281248,
+        87.24143311877745,
+        428.003037109375,
+        186.48380316971722
+      ],
+      "caption": "Table 5: Hyperparameters used for training SAC agents",
+      "caption_bbox": [
+        195.212,
+        206.53032159999998,
+        416.7901866000001,
+        216.49292160000005
+      ],
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p8_1.txt",
+      "data": [
+        [
+          "Name",
+          "Description",
+          "Unit or value"
+        ],
+        [
+          "V m",
+          "voltage magnitude",
+          "p.u"
+        ],
+        [
+          "V a",
+          "voltage angle",
+          "p.u"
+        ],
+        [
+          "S line",
+          "line flow apparent power",
+          "p.u"
+        ],
+        [
+          "P g",
+          "active power of generator",
+          "MW"
+        ],
+        [
+          "Q g",
+          "reactive power of generator",
+          "MVar"
+        ],
+        [
+          "n s",
+          "state dimension",
+          "1442"
+        ],
+        [
+          "n a",
+          "action dimension(number of plants)",
+          "16"
+        ]
+      ],
+      "detection_confidence": 0.9986
+    },
+    {
+      "table_id": "table_p8_2",
+      "page": 8,
+      "bbox": [
+        110.86350341796874,
+        222.46203738974486,
+        511.59970703125,
+        367.52906412070337
+      ],
+      "caption": "Table 5: Hyperparameters used for training SAC agents",
+      "caption_bbox": [
+        195.212,
+        206.53032159999998,
+        416.7901866000001,
+        216.49292160000005
+      ],
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p8_2.txt",
+      "data": [
+        [
+          "Hyperparameter",
+          "Description",
+          "Value"
+        ],
+        [
+          "critic_obs_fc",
+          "fully connected layers for observation in critic network",
+          "[512, 512]"
+        ],
+        [
+          "critic_action_fc",
+          "fully connected layers for action in critic network",
+          "[256]"
+        ],
+        [
+          "critic_joint_fc",
+          "fully connected layers after merging observations and actions",
+          "[256, 256]"
+        ],
+        [
+          "actor_fc",
+          "fully connected layers for policy network",
+          "[512, 512]"
+        ],
+        [
+          "batch_size",
+          "batch size",
+          "256"
+        ],
+        [
+          "episode_max_len",
+          "horizon limit during training",
+          "50"
+        ],
+        [
+          "lr",
+          "learning rate",
+          "0.0003"
+        ],
+        [
+          "\u03c4 target",
+          "Factor for soft update of the target networks",
+          "0.005"
+        ],
+        [
+          "target_update_period",
+          "Period for soft update of the target networks",
+          "1"
+        ],
+        [
+          "initial log(\u03b1)",
+          "initial value of log(\u03b1)",
+          "1"
+        ],
+        [
+          "collect_episodes",
+          "number of episodes to collect per training step",
+          "1"
+        ]
+      ],
+      "detection_confidence": 0.9998
+    },
+    {
+      "table_id": "table_p8_3",
+      "page": 8,
+      "bbox": [
+        189.1625732421875,
+        411.73706158199576,
+        417.98171874999997,
+        467.68488705945265
+      ],
+      "caption": "Table 6: Hyperparameters used for imitation learning",
+      "caption_bbox": [
+        199.854,
+        390.73332159999995,
+        412.1470434000001,
+        400.69592159999996
+      ],
+      "table_path": "data/processed\\2012.13026v1\\tables\\table_p8_3.txt",
+      "data": [
+        [
+          "Hyperparameter",
+          "Description",
+          "Value"
+        ],
+        [
+          "hidden_fc_layers",
+          "fully connected layers",
+          "[512, 512]"
+        ],
+        [
+          "batch_size",
+          "batch size",
+          "32\u223c512"
+        ],
+        [
+          "lr",
+          "learning rate",
+          "0.001"
+        ]
+      ],
+      "detection_confidence": 0.9994
+    }
+  ]
+}

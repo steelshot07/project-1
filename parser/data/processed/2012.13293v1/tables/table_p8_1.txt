@@ -1,0 +1,4 @@
+Feature extraction | Protected templates | Feature vectors
+FaceNet [30] | 96.3 % | 86.0 %
+Dlib [50] | 75.0 % | 87.3 %
+LightCNN [31] | 96.0 % | 85.3 %

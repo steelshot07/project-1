@@ -17,6 +17,11 @@ Key changes from the previous version
 - Uses Evidence / to_chroma_metadata() for ChromaDB metadata
 - Builds and persists the BM25 index alongside ChromaDB
 - Collection upgraded to 'academic_documents_v3' (new schema is incompatible)
+- v4: vector-store / BM25 keys are doc-qualified uids ('<doc_id>::<id>').
+  Parser table/figure ids ('table_p8_1') repeat across papers; in v3 later
+  papers silently overwrote earlier ones (148 items -> 137 stored).
+  v4 also stores derived metadata (entities, evidence_role, table headers…).
+  The v3 collection and data/bm25_index.json are left untouched.
 """
 
 import argparse
@@ -25,7 +30,6 @@ import os
 from typing import List
 
 import chromadb
-from sentence_transformers import SentenceTransformer
 
 from bm25_index import BM25Index
 from normalizer import normalize_document
@@ -38,8 +42,8 @@ from schema import Evidence
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_DIR = "data/chroma_db"
-COLLECTION_NAME = "academic_documents_v3"
-BM25_PATH = "data/bm25_index.json"
+COLLECTION_NAME = "academic_documents_v4"
+BM25_PATH = "data/bm25_index_v4.json"
 CHUNK_SIZE = 450
 OVERLAP = 100
 
@@ -74,6 +78,8 @@ class DocumentIndexer:
         self.chunk_size = chunk_size
         self.overlap = overlap
 
+        from sentence_transformers import SentenceTransformer
+
         print(f"[Indexer] Loading embedding model: {embedding_model}")
         self.embedding_model = SentenceTransformer(embedding_model)
 
@@ -85,6 +91,28 @@ class DocumentIndexer:
 
         self.bm25 = BM25Index(index_path=bm25_path)
         self._bm25_path = bm25_path
+
+    @classmethod
+    def from_components(
+        cls,
+        embedding_model,
+        collection,
+        bm25: BM25Index,
+        chunk_size: int = CHUNK_SIZE,
+        overlap: int = OVERLAP,
+    ) -> "DocumentIndexer":
+        """Build an indexer from existing components (no model download)."""
+        obj = object.__new__(cls)
+        obj.persist_directory = None
+        obj.collection_name = getattr(collection, "name", "")
+        obj.chunk_size = chunk_size
+        obj.overlap = overlap
+        obj.embedding_model = embedding_model
+        obj.client = None
+        obj.collection = collection
+        obj.bm25 = bm25
+        obj._bm25_path = bm25.index_path
+        return obj
 
     def reset(self) -> None:
         """Delete and recreate the ChromaDB collection and clear the BM25 index."""
@@ -121,8 +149,17 @@ class DocumentIndexer:
         Index one parsed document JSON file into ChromaDB and BM25.
         """
         doc = self.load_parsed_document(json_path)
-        doc_id = doc.get("doc_id", os.path.basename(json_path))
+        doc.setdefault("doc_id", os.path.basename(json_path))
+        self.index_parsed(doc)
 
+    def index_parsed(self, doc: dict, show_progress: bool = True) -> int:
+        """
+        Index one already-loaded parsed document.  Returns the item count.
+
+        Replace semantics: any evidence previously indexed for this doc_id is
+        removed first, so re-chunking never leaves stale chunks behind.
+        """
+        doc_id = doc.get("doc_id", "unknown")
         print(f"\n[Indexer] Indexing: {doc_id}")
 
         evidence_list: List[Evidence] = normalize_document(
@@ -133,20 +170,32 @@ class DocumentIndexer:
 
         if not evidence_list:
             print(f"[Indexer] No evidence produced for {doc_id}. Skipping.")
-            return
+            return 0
+
+        # Guard: duplicate uids inside one document would overwrite silently.
+        uids = [ev.uid for ev in evidence_list]
+        if len(uids) != len(set(uids)):
+            dups = sorted({u for u in uids if uids.count(u) > 1})
+            raise ValueError(f"Duplicate evidence uids in {doc_id}: {dups}")
+
+        # Remove this document's previous entries (replace semantics).
+        try:
+            self.collection.delete(where={"doc_id": {"$eq": doc_id}})
+        except Exception as exc:  # empty collection on some Chroma versions
+            print(f"[Indexer] (no previous entries removed for {doc_id}: {exc})")
+        self.bm25.remove_document(doc_id)
 
         # --- ChromaDB ---
         contents = [ev.content for ev in evidence_list]
-        ids = [ev.id for ev in evidence_list]
         metadatas = [ev.to_chroma_metadata() for ev in evidence_list]
 
         print(f"[Indexer] Generating embeddings for {len(evidence_list)} items…")
         embeddings = self.embedding_model.encode(
-            contents, show_progress_bar=True, normalize_embeddings=True
+            contents, show_progress_bar=show_progress, normalize_embeddings=True
         )
 
         self.collection.upsert(
-            ids=ids,
+            ids=uids,
             documents=contents,
             embeddings=embeddings.tolist(),
             metadatas=metadatas,
@@ -158,6 +207,7 @@ class DocumentIndexer:
         self.bm25.save()
 
         print(f"[Indexer] [OK] {doc_id} indexed successfully.")
+        return len(evidence_list)
 
     def index_directory(
         self,
@@ -233,7 +283,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="Delete and recreate the ChromaDB collection before indexing.",
+        help="Delete and recreate the ChromaDB collection (and BM25 file) "
+             "before indexing. Only the configured collection is touched.",
     )
     args = parser.parse_args()
 

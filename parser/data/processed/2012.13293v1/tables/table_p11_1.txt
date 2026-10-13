@@ -1,0 +1,12 @@
+Image Type | Binarization | 1.0% FAR | 0.1% FAR | 1.0% FAR | 0.1% FAR
+LightCNN | LightCNN | dlib | dlib |  | 
+Original | N | 100% | 100% | 100% | 100%
+Original | Y | 100% | 100% | 100% | 100%
+Reconstructed from | N | 91.00% | 72.66% | 91.35% | 78.89%
+unprotected template | (87.70%) | (70.03%) | (88.03%) | (76.03%) | 
+Reconstructed from | N | 73.01% | 39.79% | 78.55% | 55.71%
+protected template | (70.36%) | (38.35%)) | (75.70%) | (53.68%) | 
+Reconstructed from | Y | 74.39% | 43.60% | 50.17% | 22.84%
+unprotected template | (71.69%) | (42.04%) | (48.35%) | (22.01%) | 
+Reconstructed from | Y | 47.40% | 21.80% | 37.02 | 13.15%
+protected template | (45.68%) | (21.01%) | (35.68%) | (12.69%) | 

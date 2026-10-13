@@ -1,0 +1,23 @@
+nput: Batch size k, Learning rate η, Decision step size L, Exploration rate ε, |  |  |  |  |  | 
+Freezing interval F, Number of training episode N, |  |  |  |  |  | 
+Number of training time steps T in one episode |  |  |  |  |  | 
+ill the replay buffer randomly |  |  |  |  |  | 
+nitialize the action-value function Q with random weights w |  |  |  |  |  | 
+nitialize the target network Q– with weights w– = w |  |  |  |  |  | 
+or episode = |  |  |  |  |  | 
+← 0for t = |  |  |  |  |  | 
+if mod {(1t,, ⋯L) ,=𝑁𝑁=} 0 |  |  |  |  |  | 
+Ob{s1er,v⋯e ,s𝑇𝑇ta}te s t and choose action a t by ε-greedy strategy |  |  |  |  |  | 
+Execute action a, t obtain reward | , state |  |  |  |  | 
+Store transition < | , | , | , | , | , | > into replay buffer
+𝑡𝑡 | 𝑡𝑡 + 𝐿𝐿 |  |  |  |  | 
+Uniformly sample k transitions fr𝑟𝑟o m repl𝑠𝑠a y b uffer |  |  |  |  |  | 
+Compute the grad𝑠𝑠i 𝑡𝑡 en𝑎𝑎t 𝑡𝑡 𝑟𝑟𝑡𝑡 𝜇𝜇𝑡𝑡 | 𝑢𝑢𝑡𝑡 𝑠𝑠𝑡𝑡+ 𝐿𝐿 |  |  |  |  | 
+Update weights w in Q-network by ADAM with learning rate η |  |  |  |  |  | 
+∇𝑤𝑤(ℒ1 + 𝜆𝜆ℒ2) |  |  |  |  |  | 
+end if |  |  |  |  |  | 
+if mo𝑓𝑓d ←(f, 𝑓𝑓F)+ =1= 0 |  |  |  |  |  | 
+Update target network Q– : w– | w |  |  |  |  | 
+end if |  |  |  |  |  | 
+end for | ← |  |  |  |  | 
+nd for |  |  |  |  |  | 

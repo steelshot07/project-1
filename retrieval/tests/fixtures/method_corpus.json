@@ -1,0 +1,207 @@
+[
+  {
+    "doc_id": "synth_grid",
+    "metadata": {"title": "Synthetic: DRL and Imitation Learning for Power Grid Voltage Control", "total_pages": 7},
+    "pages": [
+      {
+        "page_number": 1,
+        "blocks": [
+          {"block_id": "p1_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "1 Introduction"},
+          {"block_id": "p1_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "Deep reinforcement learning (DRL) has been applied to autonomous voltage control of power grids. Both value-based algorithms (i.e., DQN) and policy gradient algorithms (i.e., DDPG) have been studied in previous work."},
+          {"block_id": "p1_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "Deep reinforcement learning (DRL) has been applied to autonomous voltage control of power grids. Both value-based algorithms (i.e., DQN) and policy gradient algorithms (i.e., DDPG) have been studied in previous work."}
+        ]
+      },
+      {
+        "page_number": 2,
+        "blocks": [
+          {"block_id": "p2_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "2 Method"},
+          {"block_id": "p2_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "In this work we use soft actor-critic (SAC) as the policy gradient algorithm because it encourages exploration. We further propose an imitation learning approach that is trained only on successful steps collected from a random policy."}
+        ]
+      },
+      {
+        "page_number": 4,
+        "blocks": [
+          {"block_id": "p4_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "4 Results"},
+          {"block_id": "p4_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "Fig. 1 compares the number of unsolvable cases for the SAC agent and the imitation learning agent on the test set."}
+        ]
+      },
+      {
+        "page_number": 6,
+        "blocks": [
+          {"block_id": "p6_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "References"},
+          {"block_id": "p6_b1", "bbox": [72, 110, 520, 400], "type": "paragraph", "text": "[1] V. Mnih, K. Kavukcuoglu, D. Silver et al., Human-level control through deep reinforcement learning, Nature, vol. 518, pp. 529-533, 2015. [2] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine. Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor. In Proc. ICML, 2018. [3] J. Duan et al., Deep reinforcement learning-based autonomous voltage control for power grid operations, IEEE Trans. Power Systems, vol. 35, no. 1, pp. 814-817, 2020. [4] T. P. Lillicrap et al., Continuous control with deep reinforcement learning, In Proc. ICLR, 2016."}
+        ]
+      },
+      {
+        "page_number": 7,
+        "blocks": [
+          {"block_id": "p7_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "Appendix"},
+          {"block_id": "p7_b1", "bbox": [72, 110, 520, 160], "type": "paragraph", "text": "The SAC implementation is based on TF-Agents. The hyperparameters used for training are shown in Table 5 and Table 6."}
+        ]
+      }
+    ],
+    "sections": [
+      {"section_id": "s1", "title": "1 Introduction", "page": 1, "blocks": [
+        {"block_id": "p1_b0", "type": "heading", "text": "1 Introduction"},
+        {"block_id": "p1_b1", "type": "paragraph", "text": "Deep reinforcement learning (DRL) has been applied to autonomous voltage control of power grids. Both value-based algorithms (i.e., DQN) and policy gradient algorithms (i.e., DDPG) have been studied in previous work."}
+      ]},
+      {"section_id": "s2", "title": "2 Method", "page": 2, "blocks": [
+        {"block_id": "p2_b0", "type": "heading", "text": "2 Method"},
+        {"block_id": "p2_b1", "type": "paragraph", "text": "In this work we use soft actor-critic (SAC) as the policy gradient algorithm because it encourages exploration. We further propose an imitation learning approach that is trained only on successful steps collected from a random policy."}
+      ]},
+      {"section_id": "s4", "title": "4 Results", "page": 4, "blocks": [
+        {"block_id": "p4_b0", "type": "heading", "text": "4 Results"},
+        {"block_id": "p4_b1", "type": "paragraph", "text": "Fig. 1 compares the number of unsolvable cases for the SAC agent and the imitation learning agent on the test set."}
+      ]},
+      {"section_id": "s6", "title": "References", "page": 6, "blocks": [
+        {"block_id": "p6_b0", "type": "heading", "text": "References"},
+        {"block_id": "p6_b1", "type": "paragraph", "text": "[1] V. Mnih, K. Kavukcuoglu, D. Silver et al., Human-level control through deep reinforcement learning, Nature, vol. 518, pp. 529-533, 2015. [2] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine. Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor. In Proc. ICML, 2018. [3] J. Duan et al., Deep reinforcement learning-based autonomous voltage control for power grid operations, IEEE Trans. Power Systems, vol. 35, no. 1, pp. 814-817, 2020. [4] T. P. Lillicrap et al., Continuous control with deep reinforcement learning, In Proc. ICLR, 2016."}
+      ]},
+      {"section_id": "s7", "title": "Appendix", "page": 7, "blocks": [
+        {"block_id": "p7_b0", "type": "heading", "text": "Appendix"},
+        {"block_id": "p7_b1", "type": "paragraph", "text": "The SAC implementation is based on TF-Agents. The hyperparameters used for training are shown in Table 5 and Table 6."}
+      ]}
+    ],
+    "figures": [
+      {
+        "figure_id": "fig_p4_0",
+        "page": 4,
+        "image_path": "data/processed/synth_grid/figures/fig_p4_0.png",
+        "bbox": [77.0, 300.0, 505.0, 520.0],
+        "caption": "Figure 1: Policy performance comparison of the SAC agent and the imitation learning agent.",
+        "detection_confidence": 0.9
+      }
+    ],
+    "tables": [
+      {
+        "table_id": "table_p8_1",
+        "page": 8,
+        "bbox": [90.0, 100.0, 500.0, 260.0],
+        "caption": "Table 5: Hyperparameters used for training SAC agents",
+        "table_path": "data/processed/synth_grid/tables/table_p8_1.txt",
+        "data": [
+          ["Hyperparameter", "Description", "Value"],
+          ["lr", "learning rate", "0.0003"],
+          ["batch_size", "batch size", "256"],
+          ["tau", "soft update factor of the target networks", "0.005"],
+          ["actor_fc", "fully connected layers of the policy network", "[512, 512]"]
+        ],
+        "detection_confidence": 1.0
+      },
+      {
+        "table_id": "table_p8_2",
+        "page": 8,
+        "bbox": [90.0, 300.0, 500.0, 380.0],
+        "caption": "Table 6: Hyperparameters used for imitation learning",
+        "table_path": "data/processed/synth_grid/tables/table_p8_2.txt",
+        "data": [
+          ["Hyperparameter", "Description", "Value"],
+          ["hidden_fc_layers", "fully connected layers", "[512, 512]"],
+          ["batch_size", "batch size", "32-512"],
+          ["lr", "learning rate", "0.001"]
+        ],
+        "detection_confidence": 1.0
+      }
+    ]
+  },
+  {
+    "doc_id": "synth_ramp",
+    "metadata": {"title": "Synthetic: A DRL Approach for Ramp Metering", "total_pages": 11},
+    "pages": [
+      {
+        "page_number": 2,
+        "blocks": [
+          {"block_id": "p2_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "Related Works"},
+          {"block_id": "p2_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "Classical ramp metering strategies such as ALINEA regulate on-ramp flows using point detector measurements. PI-ALINEA extends ALINEA with a proportional-integral term for downstream bottlenecks."}
+        ]
+      },
+      {
+        "page_number": 6,
+        "blocks": [
+          {"block_id": "p6_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "Methodology"},
+          {"block_id": "p6_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "The deep Q-learning agent is trained with experience replay and a target network that is updated after a fixed freezing interval."}
+        ]
+      },
+      {
+        "page_number": 9,
+        "blocks": [
+          {"block_id": "p9_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "Case study"},
+          {"block_id": "p9_b1", "bbox": [72, 110, 520, 220], "type": "paragraph", "text": "Fig. 8 presents the travel times in the mainline for three scenarios. The proposed DRL method reduces the mean travel time by 13% compared with the no-control scenario, while PI-ALINEA reduces it by 9%."}
+        ]
+      },
+      {
+        "page_number": 11,
+        "blocks": [
+          {"block_id": "p11_b0", "bbox": [72, 80, 520, 100], "type": "heading", "text": "References"},
+          {"block_id": "p11_b1", "bbox": [72, 110, 520, 400], "type": "paragraph", "text": "1. Papageorgiou, M., H. Hadj-Salem, and J.M. Blosseville, ALINEA: A local feedback control law for on-ramp metering. Transportation Research Record, 1991. 1320 (1): p. 58-67. 2. Wang, Y., et al., Local ramp metering in the presence of a distant downstream bottleneck: Theoretical analysis and simulation study. IEEE Transactions on Intelligent Transportation Systems, 2014. 15 (5): p. 2024-2039."}
+        ]
+      }
+    ],
+    "sections": [
+      {"section_id": "r2", "title": "Related Works", "page": 2, "blocks": [
+        {"block_id": "p2_b0", "type": "heading", "text": "Related Works"},
+        {"block_id": "p2_b1", "type": "paragraph", "text": "Classical ramp metering strategies such as ALINEA regulate on-ramp flows using point detector measurements. PI-ALINEA extends ALINEA with a proportional-integral term for downstream bottlenecks."}
+      ]},
+      {"section_id": "r6", "title": "Methodology", "page": 6, "blocks": [
+        {"block_id": "p6_b0", "type": "heading", "text": "Methodology"},
+        {"block_id": "p6_b1", "type": "paragraph", "text": "The deep Q-learning agent is trained with experience replay and a target network that is updated after a fixed freezing interval."}
+      ]},
+      {"section_id": "r9", "title": "Case study", "page": 9, "blocks": [
+        {"block_id": "p9_b0", "type": "heading", "text": "Case study"},
+        {"block_id": "p9_b1", "type": "paragraph", "text": "Fig. 8 presents the travel times in the mainline for three scenarios. The proposed DRL method reduces the mean travel time by 13% compared with the no-control scenario, while PI-ALINEA reduces it by 9%."}
+      ]},
+      {"section_id": "r11", "title": "References", "page": 11, "blocks": [
+        {"block_id": "p11_b0", "type": "heading", "text": "References"},
+        {"block_id": "p11_b1", "type": "paragraph", "text": "1. Papageorgiou, M., H. Hadj-Salem, and J.M. Blosseville, ALINEA: A local feedback control law for on-ramp metering. Transportation Research Record, 1991. 1320 (1): p. 58-67. 2. Wang, Y., et al., Local ramp metering in the presence of a distant downstream bottleneck: Theoretical analysis and simulation study. IEEE Transactions on Intelligent Transportation Systems, 2014. 15 (5): p. 2024-2039."}
+      ]}
+    ],
+    "figures": [
+      {
+        "figure_id": "fig_p10_0",
+        "page": 10,
+        "image_path": "data/processed\\synth_ramp\\figures\\fig_p10_0.png",
+        "bbox": [80.0, 120.0, 510.0, 360.0],
+        "caption": "Figure 8: Vehicle travel times in the mainline.",
+        "detection_confidence": 0.9
+      },
+      {
+        "figure_id": "fig_p9_0",
+        "page": 9,
+        "image_path": "data/processed/synth_ramp/figures/fig_p9_0.png",
+        "bbox": [80.0, 420.0, 510.0, 640.0],
+        "caption": "Figure 7: Structure of the deep neural network.",
+        "detection_confidence": 0.9
+      }
+    ],
+    "tables": [
+      {
+        "table_id": "table_p8_1",
+        "page": 10,
+        "bbox": [72.0, 400.0, 520.0, 560.0],
+        "caption": "Table 3: Mean travel times in 20 simulation experiments (s)",
+        "table_path": "data/processed/synth_ramp/tables/table_p8_1.txt",
+        "data": [
+          ["No.", "No controls", "PI-ALINEA", "DRL"],
+          ["1", "186", "179 [-4%]", "171 [-8%]"],
+          ["2", "203", "173 [-15%]", "171 [-16%]"],
+          ["Mean", "201", "176", "172"]
+        ],
+        "detection_confidence": 1.0
+      },
+      {
+        "table_id": "table_p7_1",
+        "page": 7,
+        "bbox": [84.0, 279.0, 378.0, 409.0],
+        "caption": "Table 2: Key parameters in deep Q-learning for ramp metering",
+        "table_path": "data/processed/synth_ramp/tables/table_p7_1.txt",
+        "data": [
+          ["Parameters", "Value"],
+          ["Replay buffer size B", "2x10^5"],
+          ["Learning rate", "2.5x10^-4"],
+          ["Batch size k", "32"]
+        ],
+        "detection_confidence": 1.0
+      }
+    ]
+  }
+]

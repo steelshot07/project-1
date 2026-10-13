@@ -1,0 +1,12 @@
+Hyperparameter | Description | Value
+critic_obs_fc | fully connected layers for observation in critic network | [512, 512]
+critic_action_fc | fully connected layers for action in critic network | [256]
+critic_joint_fc | fully connected layers after merging observations and actions | [256, 256]
+actor_fc | fully connected layers for policy network | [512, 512]
+batch_size | batch size | 256
+episode_max_len | horizon limit during training | 50
+lr | learning rate | 0.0003
+τ target | Factor for soft update of the target networks | 0.005
+target_update_period | Period for soft update of the target networks | 1
+initial log(α) | initial value of log(α) | 1
+collect_episodes | number of episodes to collect per training step | 1

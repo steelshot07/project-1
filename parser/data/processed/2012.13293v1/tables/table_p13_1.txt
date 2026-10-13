@@ -1,0 +1,7 @@
+Face and Gesture Recognition, 2018.
+[45] J. Daugman, “Information theory and the iriscode,” IE
+Trans. Information Forensics and Security, vol. 11, no
+pp. 400–409, 2016.
+[46] J. Zhu, T. Park, P. Isola, and A. A. Efros, “Unpai
+image-to-image translation using cycle-consistent adv
+sarial networks,” in IEEE International Conference

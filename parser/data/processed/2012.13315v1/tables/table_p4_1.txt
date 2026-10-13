@@ -1,0 +1,3 @@
+2. For any subset C ⊆ [N], there exists a function f¯ ∈ F¯ such that f¯(z i ) = y i if i ∈ C an
+f¯(z i ) = y(cid:48) i otherwise.
+4

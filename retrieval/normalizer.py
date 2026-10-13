@@ -17,10 +17,13 @@ NOT responsible for:
 - Generating answers
 """
 
+import json
 import os
 import re
 from typing import Any, Dict, List, Optional
 
+from citation_detector import FIGURE_PATTERN, TABLE_PATTERN
+from evidence_signals import derive_metadata, is_backmatter_heading
 from schema import Evidence
 
 
@@ -63,6 +66,7 @@ def _collect_ordered_blocks(
     Strategy:
     1. Build block_id → section_title mapping from sections.
     2. Walk pages in order; emit each block with its section context.
+       Duplicate block_ids are emitted once.
     """
     # Map block_id → section title
     block_to_section: Dict[str, str] = {}
@@ -73,7 +77,12 @@ def _collect_ordered_blocks(
             if bid:
                 block_to_section[bid] = title
 
+    # Text is taken from `pages` ONLY; `sections` contribute titles, never
+    # text, so a block present in both representations is indexed once.
+    # The seen-set additionally guards against a parser emitting the same
+    # block twice within `pages`.
     ordered: List[Dict[str, Any]] = []
+    seen: set = set()
     for page in doc.get("pages", []):
         page_num = page.get("page_number")
         for block in page.get("blocks", []):
@@ -81,6 +90,10 @@ def _collect_ordered_blocks(
             if not text or len(text) < 5:
                 continue
             bid = block.get("block_id", "")
+            key = bid or (page_num, text)
+            if key in seen:
+                continue
+            seen.add(key)
             ordered.append(
                 {
                     "block_id": bid,
@@ -115,27 +128,38 @@ def _sliding_window_chunks(
         section = block_list[0].get("section") if block_list else None
         page = min(pages) if pages else None
         chunk_id = f"{doc_id}_chunk_{n}"
+        content = "\n\n".join(texts)
+        metadata: Dict[str, Any] = {
+            "chunk_id": chunk_id,
+            "block_ids": ",".join(b["block_id"] for b in block_list),
+            "start_page": min(pages) if pages else None,
+            "end_page": max(pages) if pages else None,
+            "source_type": "parser_text_blocks",
+        }
+        metadata.update(derive_metadata("text", content, None, section))
         return Evidence(
             id=chunk_id,
             doc_id=doc_id,
             type="text",
-            content="\n\n".join(texts),
+            content=content,
             page=page,
             section=section or None,
             bbox=None,
             caption=None,
             artifact_path=None,
-            metadata={
-                "chunk_id": chunk_id,
-                "block_ids": ",".join(b["block_id"] for b in block_list),
-                "start_page": min(pages) if pages else None,
-                "end_page": max(pages) if pages else None,
-            },
+            metadata=metadata,
         )
 
     for block in blocks:
         tok = _estimate_tokens(block["text"])
-        if current and current_tokens + tok > chunk_size:
+        # Never merge prose with the bibliography: a References /
+        # Bibliography / Appendix heading always opens a fresh chunk
+        # (no overlap), so reference lists form their own chunks.
+        if current and is_backmatter_heading(block["text"]):
+            chunks.append(_flush(current, chunk_number))
+            chunk_number += 1
+            current, current_tokens = [], 0
+        elif current and current_tokens + tok > chunk_size:
             chunks.append(_flush(current, chunk_number))
             chunk_number += 1
             # Overlap: keep trailing blocks whose tokens fit within overlap budget
@@ -183,9 +207,75 @@ def _table_content(table: Dict[str, Any]) -> str:
     return "\n".join(parts)
 
 
+def _table_structure(table: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Structured table fields kept alongside the flattened content so that
+    downstream consumers can render the table and keep each value attached
+    to its parameter name / column header.
+
+    table_headers : cells of the first non-empty row (the parser does not
+                    mark header rows, so this is a best-effort guess and is
+                    labelled as such by `table_header_source`)
+    row_labels    : first non-empty cell of every following row
+    table_data    : all rows, cells stripped (JSON string)
+    """
+    rows = [[str(c).strip() for c in row] for row in table.get("data", []) or []]
+    non_empty = [r for r in rows if any(r)]
+    headers = [c for c in non_empty[0] if c] if non_empty else []
+    row_labels = [next(c for c in r if c) for r in non_empty[1:]]
+    return {
+        "table_headers": json.dumps(headers, ensure_ascii=False),
+        "table_header_source": "first_non_empty_row",
+        "row_labels": json.dumps(row_labels, ensure_ascii=False),
+        "table_data": json.dumps(rows, ensure_ascii=False),
+        "n_rows": len(non_empty),
+        "n_cols": max((len(r) for r in rows), default=0),
+    }
+
+
+def _label_number(caption: Optional[str], pattern: re.Pattern) -> Optional[str]:
+    """'Figure 8: Vehicle travel times…' -> '8'  (only at caption start)."""
+    if not caption:
+        return None
+    m = pattern.match(caption.strip())
+    return m.group(1) if m else None
+
+
+def _citing_blocks(
+    number: Optional[str],
+    pattern: re.Pattern,
+    blocks: List[Dict[str, Any]],
+    max_blocks: int = 2,
+    max_chars: int = 300,
+) -> List[Dict[str, Any]]:
+    """
+    Text blocks that refer to 'Figure N' / 'Table N', excluding the caption
+    block itself ('Figure N: …').  Used as surrounding-text context.
+    """
+    if not number:
+        return []
+    caption_start = re.compile(
+        pattern.pattern + r"\s*[:.]", re.IGNORECASE
+    )
+    found: List[Dict[str, Any]] = []
+    for b in blocks:
+        text = b["text"]
+        if number not in pattern.findall(text):
+            continue
+        m = caption_start.match(text.strip())
+        if m and m.group(1) == number:
+            continue  # this block IS the caption
+        found.append({"block_id": b["block_id"], "page": b["page"],
+                      "text": text[:max_chars]})
+        if len(found) >= max_blocks:
+            break
+    return found
+
+
 def _normalize_tables(
     doc_id: str,
     tables: List[Dict[str, Any]],
+    blocks: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Evidence]:
     evidence = []
     for table in tables:
@@ -195,6 +285,21 @@ def _normalize_tables(
         content = _table_content(table)
         if not content.strip():
             continue
+        caption = table.get("caption")
+        metadata: Dict[str, Any] = {
+            "detection_confidence": table.get("detection_confidence", 0.0),
+            "source_id": tid,
+            "source_type": "parser_table",
+        }
+        metadata.update(_table_structure(table))
+        number = _label_number(caption, TABLE_PATTERN)
+        if number:
+            metadata["label"] = f"Table {number}"
+            citing = _citing_blocks(number, TABLE_PATTERN, blocks or [])
+            if citing:
+                metadata["referenced_by"] = ",".join(c["block_id"] for c in citing)
+                metadata["context_text"] = " … ".join(c["text"] for c in citing)
+        metadata.update(derive_metadata("table", content, caption))
         evidence.append(
             Evidence(
                 id=tid,
@@ -204,13 +309,9 @@ def _normalize_tables(
                 page=table.get("page"),
                 section=None,
                 bbox=table.get("bbox"),
-                caption=table.get("caption"),
+                caption=caption,
                 artifact_path=_normalize_path(table.get("table_path")),
-                metadata={
-                    "detection_confidence": table.get(
-                        "detection_confidence", 0.0
-                    ),
-                },
+                metadata=metadata,
             )
         )
     return evidence
@@ -220,28 +321,51 @@ def _normalize_tables(
 # Figure normalisation
 # ---------------------------------------------------------------------------
 
-def _figure_content(figure: Dict[str, Any]) -> str:
+def _figure_content(
+    figure: Dict[str, Any],
+    citing: Optional[List[Dict[str, Any]]] = None,
+) -> str:
     """
     Build a searchable text representation of a figure.
-    Currently: caption text only.
-    Can be extended with OCR or surrounding-text context.
+
+    caption + (optional) the body-text sentences that cite the figure.
+    Image pixels are NOT embedded: figure retrieval is text-based.
     """
-    caption = figure.get("caption", "")
-    return caption.strip() if caption else ""
+    caption = (figure.get("caption") or "").strip()
+    if citing:
+        ctx = " … ".join(c["text"] for c in citing)
+        return f"{caption}\nReferenced in text: {ctx}" if caption else ctx
+    return caption
 
 
 def _normalize_figures(
     doc_id: str,
     figures: List[Dict[str, Any]],
+    blocks: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Evidence]:
     evidence = []
     for fig in figures:
         fid = fig.get("figure_id", "")
         if not fid:
             continue
-        content = _figure_content(fig)
+        caption = fig.get("caption")
+        number = _label_number(caption, FIGURE_PATTERN)
+        citing = _citing_blocks(number, FIGURE_PATTERN, blocks or [])
+        content = _figure_content(fig, citing)
         if not content.strip():
             content = f"Figure on page {fig.get('page', '?')}"
+        metadata: Dict[str, Any] = {
+            "detection_confidence": fig.get("detection_confidence", 0.0),
+            "source_id": fid,
+            "source_type": "parser_figure",
+            "content_basis": "caption_and_citing_text" if citing else "caption_only",
+        }
+        if number:
+            metadata["label"] = f"Figure {number}"
+        if citing:
+            metadata["referenced_by"] = ",".join(c["block_id"] for c in citing)
+            metadata["context_text"] = " … ".join(c["text"] for c in citing)
+        metadata.update(derive_metadata("figure", content, caption))
         evidence.append(
             Evidence(
                 id=fid,
@@ -251,13 +375,9 @@ def _normalize_figures(
                 page=fig.get("page"),
                 section=None,
                 bbox=fig.get("bbox"),
-                caption=fig.get("caption"),
+                caption=caption,
                 artifact_path=_normalize_path(fig.get("image_path")),
-                metadata={
-                    "detection_confidence": fig.get(
-                        "detection_confidence", 0.0
-                    ),
-                },
+                metadata=metadata,
             )
         )
     return evidence
@@ -297,10 +417,10 @@ def normalize_document(
     )
 
     # Tables
-    table_evidence = _normalize_tables(doc_id, doc.get("tables", []))
+    table_evidence = _normalize_tables(doc_id, doc.get("tables", []), blocks)
 
     # Figures
-    figure_evidence = _normalize_figures(doc_id, doc.get("figures", []))
+    figure_evidence = _normalize_figures(doc_id, doc.get("figures", []), blocks)
 
     all_evidence = text_evidence + table_evidence + figure_evidence
 

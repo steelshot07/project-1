@@ -1,0 +1,9 @@
+Parameters | Value
+Replay buffer size B | 2×105
+Learning rate η | 2.5×10-4
+Batch size k | 32
+Exploration rate ε | 0.1
+Freeze interval F | 104
+Decision step size L | 4 s
+Reward weight μ | 0.5
+Reward weight ω | -0.1

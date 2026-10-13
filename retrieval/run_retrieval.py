@@ -19,7 +19,7 @@ def main():
     
     # Absolute paths pointing to the project root
     chroma_dir = os.path.join(PROJECT_ROOT, "data", "chroma_db")
-    bm25_path = os.path.join(PROJECT_ROOT, "data", "bm25_index.json")
+    bm25_path = os.path.join(PROJECT_ROOT, "data", "bm25_index_v4.json")
     
     indexer = DocumentIndexer(
         persist_directory=chroma_dir,
@@ -65,9 +65,16 @@ def main():
             if result.artifact_path:
                 print(f"   Image/Text Path: {result.artifact_path}")
             
+            if result.assessment:
+                print(f"   Evidence: {result.assessment['label']}")
+
             # Print a short snippet of the content
             snippet = result.content[:150].replace('\n', ' ')
             print(f"   Snippet: {snippet}...\n")
+
+        v = response.validation
+        print(f"Validation: {v.status} (entity mismatch: {v.entity_mismatch})")
+        print(f"   {v.explanation}")
 
 
 if __name__ == "__main__":

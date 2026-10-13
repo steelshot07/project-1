@@ -1,0 +1,4 @@
+ven an instance z ∈ Z, the performance of the parameter setting selected by fˆ is u fˆ(z) (z) | 
+(cid:104) | (cid:105)
+und the expected quality E z∼D u fˆ(z) (z) | of the learned algorithm selector.
+3 | 

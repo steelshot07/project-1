@@ -42,6 +42,54 @@ QUERIES = [
     },
 ]
 
+# Validation cases: the two observed failures.  These check the evidence
+# validator's verdict on the live index, not exact rankings.
+VALIDATION_CASES = [
+    {
+        "query": "What hyperparameters were used for the DQN?",
+        "label": "Method mismatch (DQN hyperparameters not reported)",
+        "expect_status": {"ENTITY_MISMATCH", "INSUFFICIENT_EVIDENCE"},
+        "forbid_supported": ["DQN"],
+        "expect_mismatch_any": ["SAC", "Imitation learning"],
+    },
+    {
+        "query": "Compare travel times between PI-ALINEA and DQN",
+        "label": "Comparison mismatch (PI-ALINEA vs DRL, not DQN)",
+        "expect_status": {"ENTITY_MISMATCH"},
+        "forbid_supported": ["DQN"],
+        "expect_mismatch_any": ["DRL"],
+        "expect_type": "figure",
+    },
+]
+
+
+def run_validation_cases(retriever, verbose: bool = False) -> int:
+    failures = 0
+    for case in VALIDATION_CASES:
+        resp = retriever.search(query=case["query"], top_k=5,
+                                use_reranker=False, expand_evidence=False)
+        v = resp.validation
+        checks = {
+            "status": v.status in case["expect_status"],
+            "not_supported": not any(e in v.supported_entities
+                                     for e in case["forbid_supported"]),
+            "mismatch_named": any(e in v.mismatched_entities
+                                  for e in case["expect_mismatch_any"]),
+            "provenance": all(r.doc_id and r.uid for r in resp.results),
+        }
+        if case.get("expect_type"):
+            checks["type_kept"] = any(r.type == case["expect_type"]
+                                      for r in resp.results)
+        ok = all(checks.values())
+        print(f"  {'[OK]  ' if ok else '[FAIL]'} {case['label']}")
+        if verbose or not ok:
+            print(f"         status={v.status} mismatch={v.entity_mismatch} checks={checks}")
+            print(f"         {v.explanation[:300]}")
+            print()
+        failures += 0 if ok else 1
+    return failures
+
+
 def run_smoke_test(verbose: bool = False) -> int:
     """Returns number of failures."""
     print("\n[Smoke Test] Loading retriever...")
@@ -109,7 +157,10 @@ def run_smoke_test(verbose: bool = False) -> int:
         if not ok:
             failures += 1
 
-    print(f"\n[Smoke Test] Results: {len(QUERIES) - failures}/{len(QUERIES)} passed")
+    print("\n[Smoke Test] Validation cases:")
+    failures += run_validation_cases(retriever, verbose)
+    total = len(QUERIES) + len(VALIDATION_CASES)
+    print(f"\n[Smoke Test] Results: {total - failures}/{total} passed")
     return failures
 
 

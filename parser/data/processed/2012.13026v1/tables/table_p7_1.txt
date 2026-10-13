@@ -1,0 +1,17 @@
+arXiv preprint arXiv:2006.06728, 2020.
+[6] J. Duan et al., "Deep reinforcement learning-based autonomous voltage control for power grid operations,"
+IEEE Trans. Power Systems, vol. 35, no. 1, pp. 814-817, Jan. 2020.
+[7] C. Li, C. Jin, and R. K. Sharma, “Coordination of pv smart inverters using deep reinforcement learning for
+grid voltage regulation,” 2019 18th IEEE International Conference On Machine Learning And Applications
+(ICMLA), pp. 1930–1937, 2019
+[8] R. S. Sutton, D. Mcallester, S. Singh, and Y. Mansour. "Policy gradient methods for reinforcement learning
+with function approximation." In NIPS, pages 1057–1063. MIT Press, 2000.
+[9] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine. Soft actor-critic: Off-policy maximum entropy deep
+reinforcement learning with a stochastic actor. In International Conference on Machine Learning (ICML),
+volume 80, pages 1856–1865, 2018.
+[10] G. Brockman et al., "OpenAI Gym", arXiv:1606.01540, 2016
+[11]Singh,Satinder,T.JaakkolaandMichaelI.Jordan. “Learningwithoutstate-estimationinpartiallyobservable
+markovian decision processes.” Proc. ICML-94, pp. 284-292.
+Appendix:
+All code implementations are based on TensorFlow 2.3.0. The SAC implementation is based on TF-Agents 0.6.0.
+The hyperparameters used for training are shown in Table 5 and 6.
